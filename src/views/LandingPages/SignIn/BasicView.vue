@@ -14,6 +14,7 @@ import MaterialButton from "@/components/MaterialButton.vue";
 
 // material-input
 import setMaterialInput from "@/assets/js/material-input";
+import { jwtDecode } from "jwt-decode";
 
 // Definir las propiedades reactivas utilizando ref()
 const fields = ref([
@@ -61,25 +62,25 @@ const createUser = async () => {
 //Método de login
 const login = async () => {
   try {
-    await axios.post('login/', {
+    const response = await axios.post('/api/token/', {
       email: emailLogin.value,
       password: passwordLogin.value
-    })
-    .then(response => {
-      const appStore = useAppStore();
-      appStore.guardarToken(response.data); // Llamada directa a la acción
-      router.push({ name: 'about'});
-    })
+    });
 
-    // console.log(response.data.access);
+    const appStore = useAppStore();
+    appStore.guardarToken(response.data);
 
-    // console.log(appStore.token);
+    const access = response.data.access;
+    const decoded = jwtDecode(access);
+    console.log('Rol:', decoded.rol);
+
+    appStore.guardarRol(decoded.rol);
+    router.push({ name: 'about' });
 
   } catch (error) {
     console.log(error);
   }
 }
-
 
 // Método para listar roles
 const listarRol = async () => {

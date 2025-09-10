@@ -18,7 +18,10 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
+                    <!-- Login -->
+                    <RouterLink :to="{ name: 'signin-basic' }" class="nav-link">
+                        Login
+                    </RouterLink>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="https://wa.me/502XXXXXXXX" target="_blank">Soporte</a>
