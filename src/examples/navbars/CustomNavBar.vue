@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useAppStore } from '@/stores/index';
 
 const store = useAppStore();
-const isAdmin = computed(() => store.rol === 'Admin' || store.rol === 'admin'); // Ajusta el valor según tu backend
+const isAdmin = computed(() => store.rol === 'Admin' || store.rol === 'admin'); 
 </script>
 
 <template>
@@ -42,6 +42,12 @@ const isAdmin = computed(() => store.rol === 'Admin' || store.rol === 'admin'); 
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminMenu">
                         <li>
                             <RouterLink class="dropdown-item" :to="{ name: 'products' }">Crear Producto</RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'plagues' }">Registro de Plagas</RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones</RouterLink>
                         </li>
                     </ul>
                 </li>

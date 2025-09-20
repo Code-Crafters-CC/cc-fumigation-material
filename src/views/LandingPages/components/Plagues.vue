@@ -1,21 +1,15 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-//example components
+import { useAppStore } from '@/stores/index';
+// Components
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import DefaultFooter from "@/examples/footers/FooterDefault.vue";
-
-//image
+import MaterialButton from "@/components/MaterialButton.vue";
+import setMaterialInput from "@/assets/js/material-input";
 import image from "@/assets/img/illustrations/illustration-signin.jpg";
 
-//material components
-import MaterialInput from "@/components/MaterialInput.vue";
-import MaterialTextArea from "@/components/MaterialTextArea.vue";
-import MaterialButton from "@/components/MaterialButton.vue";
-
-// material-input
-import setMaterialInput from "@/assets/js/material-input";
-
+const store = useAppStore();
 const listPlagues = ref([]);
 const fieldsPlagues = ref([
   "id",
@@ -23,27 +17,49 @@ const fieldsPlagues = ref([
   "insert_date",
   "plague_type"
 ]);
-
-
 const plagueName = ref("");
-const plagueType = ref("")
-
+const plagueType = ref("");
 const fieldsPlagueType = ref(["id", "plague_type_name"]);
 const listPlagueType = ref([]);
+const editingId = ref(null);
 
-const clear = async () => {
-    plagueName.value = "";
-    plagueType.value = "";
-}
+const clear = () => {
+  plagueName.value = "";
+  plagueType.value = "";
+  editingId.value = null;
+};
 
-// Método para crear una fumigación
-const createPlague = async () => {
+const createOrUpdatePlague = async () => {
   try {
-    const response = await axios.post("plague/", {
-      plague_name: plagueName.value,
-      plague_type: plagueType.value
-    });
-    console.log(response);
+    if (editingId.value) {
+      // PATCH
+      await axios.patch(
+        `plague/${editingId.value}/`,
+        {
+          plague_name: plagueName.value,
+          plague_type: plagueType.value
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${store.token.access}`,
+          }
+        }
+      );
+    } else {
+      // POST
+      await axios.post(
+        "plague/",
+        {
+          plague_name: plagueName.value,
+          plague_type: plagueType.value
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${store.token.access}`,
+          }
+        }
+      );
+    }
     await listPlague();
     clear();
   } catch (error) {
@@ -53,21 +69,47 @@ const createPlague = async () => {
 
 const listPlague = async () => {
   try {
-    await axios.get("plague/").then((response) => {
-      listPlagues.value = response.data;
-      console.log(response);
+    const response = await axios.get("plague/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
     });
+    listPlagues.value = response.data;
   } catch (error) {
     console.log(error);
   }
 };
 
-// Método para listar plagas
 const listarPlagueType = async () => {
   try {
-    const response = await axios.get("plagueType/list/");
+    const response = await axios.get("plagueType/list/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
     listPlagueType.value = response.data;
-    console.log(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const editPlague = (plague) => {
+  editingId.value = plague.id;
+  plagueName.value = plague.plague_name;
+  // Si plague_type es un objeto, usa su id, si es un id ya, úsalo directo
+  plagueType.value = plague.plague_type.id ?? plague.plague_type;
+};
+
+const deletePlague = async (id) => {
+  if (!confirm("¿Seguro que deseas eliminar esta plaga?")) return;
+  try {
+    await axios.delete(`plague/${id}/`, {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
+    await listPlague();
+    if (editingId.value === id) clear();
   } catch (error) {
     console.log(error);
   }
@@ -79,7 +121,9 @@ onMounted(() => {
   listarPlagueType();
 });
 </script>
+
 <template>
+  <!-- FontAwesome debe estar en tu index.html -->
   <div class="container position-sticky z-index-sticky top-0">
     <div class="row">
       <div class="col-12">
@@ -109,23 +153,15 @@ onMounted(() => {
               loading="lazy"
             ></div>
           </div>
-          <!-- FUMIGATIONS REGISTER -->
+          <!-- PLAGUE REGISTER -->
           <div class="container py-4">
             <div class="row justify-content-center">
-              <div class="col-md-3 d-flex flex-column mx-auto">
-                <div
-                  class="card d-flex blur justify-content-center shadow-lg my-sm-0 my-sm-6 mt-8 mb-5"
-                >
-                  <div
-                    class="card-header p-0 position-relative mt-n4 mx-3 z-index-2"
-                  >
-                    <div
-                      class="bg-gradient-success shadow-success border-radius-lg p-3"
-                    >
-                      <h3
-                        class="text-white font-weight-bolder text-center mt-2 mb-0"
-                      >
-                        Registro de Fumigaciones
+              <div class="col-md-5 d-flex flex-column mx-auto">
+                <div class="card d-flex blur justify-content-center shadow-lg my-sm-0 my-sm-6 mt-8 mb-5">
+                  <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-success shadow-success border-radius-lg p-3">
+                      <h3 class="text-white font-weight-bolder text-center mt-2 mb-0">
+                        Registro de Plagas
                       </h3>
                     </div>
                   </div>
@@ -135,7 +171,7 @@ onMounted(() => {
                       id="contact-form"
                       method="post"
                       autocomplete="off"
-                      @submit.prevent="onsubmit"
+                      @submit.prevent="createOrUpdatePlague"
                     >
                       <div class="card-body">
                         <div class="row">
@@ -171,9 +207,13 @@ onMounted(() => {
                                 variant="gradient"
                                 color="success"
                                 fullWidth
-                                @click="createPlague"
+                                type="submit"
                               >
-                                Registrar
+                                {{ editingId ? "Actualizar" : "Registrar" }}
+                              </MaterialButton>
+                              <MaterialButton v-if="editingId" class="my-4 mb-2" variant="outlined" color="dark" fullWidth
+                                @click="clear">
+                                Cancelar edición
                               </MaterialButton>
                             </div>
                           </div>
@@ -184,45 +224,52 @@ onMounted(() => {
                 </div>
               </div>
 
-              <!-- FUMIGATIONS LIST -->
+              <!-- PLAGUES LIST -->
               <div class="col-md-8 col-xl-7 d-flex flex-column mx-auto mt-4 mt-md-0">
                 <div
                   class="card d-flex blur justify-content-center shadow-lg my-sm-0 my-sm-6 mt-8 mb-5"
-                  style="margin-top: 60px; margin-left: 30px; padding: 50px 20px 15px 5px; /* arriba, derecha, abajo, izquierda */"
+                  style="margin-top: 60px; margin-left: 30px; padding: 50px 20px 15px 5px;"
                 >
-                  <div
-                    class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent"
-                  >
-                    <div
-                      class="bg-gradient-success shadow-success border-radius-lg p-3"
-                    >
-                      <h3 class="text-white text-success mb-0">Fumigaciones</h3>
+                  <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+                    <div class="bg-gradient-success shadow-success border-radius-lg p-3">
+                      <h3 class="text-white text-success mb-0">Plagas</h3>
                     </div>
                   </div>
-                  <!-- Listado de fumigaciones-->
+                  <!-- Listado de plagas-->
                   <div class="card-body">
-                    <div
-                      class="table-responsive" style="max-height: 200px; overflow-y: auto; margin-top: 10px; margin-left: 15px;"
-                    >
-                      <table
-                        class="table table-striped"
-                        :items="listPlagues"
-                        :fields="fieldsPlagues"
-                      >
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                      <table class="table table-striped">
                         <thead>
                           <tr>
                             <th scope="col">#</th>
                             <th scope="col">Plaga</th>
                             <th scope="col">Tipo de Plaga</th>
                             <th scope="col">Fecha de creación</th>
+                            <th scope="col">Acciones</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="(lP, i) in listPlagues" v-bind:key="lP.id">
+                          <tr v-for="(lP, i) in listPlagues" :key="lP.id">
                             <td>{{ lP.id }}</td>
                             <td>{{ lP.plague_name }}</td>
                             <td>{{ lP.plague_type['plague_type_name'] }}</td>
                             <td>{{ lP.insert_date }}</td>
+                            <td>
+                              <button class="btn btn-link p-0 me-2" @click="editPlague(lP)" title="Editar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.232 5.232l3.536 3.536M9 13.5V17h3.5l7.036-7.036a2.002 2.002 0 0 0 0-2.828l-3.672-3.672a2.002 2.002 0 0 0-2.828 0L9 7.5z" />
+                                </svg>
+                              </button>
+                              <button class="btn btn-link p-0" @click="deletePlague(lP.id)" title="Eliminar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5-4h4a2 2 0 0 1 2 2v2H7V5a2 2 0 0 1 2-2zm-4 4h12"/>
+                                </svg>
+                              </button>
+                            </td>
                           </tr>
                         </tbody>
                       </table>

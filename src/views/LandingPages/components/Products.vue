@@ -21,7 +21,7 @@ const product_type = ref("");
 const listProductType = ref([]);
 const store = useAppStore();
 
-const editingId = ref(null); // Si estamos editando, aquí va el ID
+const editingId = ref(null);
 
 const clean = async () => {
   product_name.value = "";

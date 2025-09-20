@@ -1,20 +1,15 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-//example components
+import { useAppStore } from '@/stores/index';
+// Components
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import DefaultFooter from "@/examples/footers/FooterDefault.vue";
-
-//image
+import MaterialButton from "@/components/MaterialButton.vue";
+import setMaterialInput from "@/assets/js/material-input";
 import image from "@/assets/img/illustrations/illustration-signin.jpg";
 
-//material components
-import MaterialInput from "@/components/MaterialInput.vue";
-import MaterialTextArea from "@/components/MaterialTextArea.vue";
-import MaterialButton from "@/components/MaterialButton.vue";
-
-// material-input
-import setMaterialInput from "@/assets/js/material-input";
+const store = useAppStore();
 
 const listFumigations = ref([]);
 const fieldsFumigations = ref([
@@ -46,8 +41,9 @@ const listPlague = ref([]);
 const listProducts = ref([]);
 const listControlMethod = ref([]);
 const listStatus = ref([]);
+const editingId = ref(null);
 
-const clean = async () => {
+const clean = () => {
   client_name.value = "";
   client_phone.value = "";
   client_dpi.value = "";
@@ -58,12 +54,13 @@ const clean = async () => {
   products.value = "";
   control_method.value = "";
   status.value = "";
+  editingId.value = null;
 };
 
-// Método para crear una fumigación
-const createFumigation = async () => {
+// PATCH y POST
+const createOrUpdateFumigation = async () => {
   try {
-    const response = await axios.post("controlForm/", {
+    const payload = {
       client_name: client_name.value,
       client_phone: client_phone.value,
       client_dpi: client_dpi.value,
@@ -74,8 +71,28 @@ const createFumigation = async () => {
       products: products.value,
       control_method: control_method.value,
       status: status.value,
-    });
-    console.log(response);
+    };
+    if (editingId.value) {
+      await axios.patch(
+        `controlForm/${editingId.value}/`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${store.token.access}`,
+          }
+        }
+      );
+    } else {
+      await axios.post(
+        "controlForm/",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${store.token.access}`,
+          }
+        }
+      );
+    }
     await listarFumigaciones();
     clean();
   } catch (error) {
@@ -85,54 +102,121 @@ const createFumigation = async () => {
 
 const listarFumigaciones = async () => {
   try {
-    await axios.get("controlForm/").then((response) => {
-      listFumigations.value = response.data;
-      console.log(response);
+    const response = await axios.get("controlForm/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
     });
+    listFumigations.value = response.data;
   } catch (error) {
     console.log(error);
   }
 };
 
-// Método para listar plagas
+// Métodos para listar otros datos (todos con token)
 const listarPlagues = async () => {
   try {
-    const response = await axios.get("plague/");
+    const response = await axios.get("plague/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
     listPlague.value = response.data;
-    console.log(listPlague.value);
   } catch (error) {
     console.log(error);
   }
 };
 
-// Método para listar productos
 const listarProducts = async () => {
   try {
-    const response = await axios.get("product/");
+    const response = await axios.get("product/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
     listProducts.value = response.data;
-    console.log(lisProducts.value);
   } catch (error) {
     console.log(error);
   }
 };
 
-// Método para listar métodos de control
 const listarControlMethods = async () => {
   try {
-    const response = await axios.get("controlMethod/");
+    const response = await axios.get("controlMethod/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
     listControlMethod.value = response.data;
-    console.log(listControlMethod.value);
   } catch (error) {
     console.log(error);
   }
 };
 
-// Método para listar los status
 const listarStatus = async () => {
   try {
-    const response = await axios.get("status/");
+    const response = await axios.get("status/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
     listStatus.value = response.data;
-    console.log(listStatus.value);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+function formatDateForInput(dateStr) {
+  if (!dateStr) return '';
+  return dateStr.replace('Z', '').slice(0, 16);
+}
+
+
+// Editar
+const editFumigation = (fumigation) => {
+  editingId.value = fumigation.id;
+  client_name.value = fumigation.client_name;
+  client_phone.value = fumigation.client_phone;
+  client_dpi.value = fumigation.client_dpi;
+  fumigation_date.value = formatDateForInput(fumigation.fumigation_date);
+  destination_place.value = fumigation.destination_place;
+  total_products.value = fumigation.total_products;
+  // --- CORREGIDO: ASIGNA SOLO EL ID, NO EL OBJETO ---
+  plague.value =
+    typeof fumigation.plague === "object" && fumigation.plague !== null
+      ? fumigation.plague.id
+      : fumigation.plague;
+
+  products.value = Array.isArray(fumigation.products)
+    ? fumigation.products.map((p) =>
+        typeof p === "object" && p !== null ? p.id : p
+      )
+    : typeof fumigation.products === "object" && fumigation.products !== null
+    ? fumigation.products.id
+    : fumigation.products;
+
+  control_method.value =
+    typeof fumigation.control_method === "object" && fumigation.control_method !== null
+      ? fumigation.control_method.id
+      : fumigation.control_method;
+
+  status.value =
+    typeof fumigation.status === "object" && fumigation.status !== null
+      ? fumigation.status.id
+      : fumigation.status;
+};
+
+// Eliminar
+const deleteFumigation = async (id) => {
+  if (!confirm("¿Seguro que deseas eliminar esta fumigación?")) return;
+  try {
+    await axios.delete(`controlForm/${id}/`, {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
+    await listarFumigaciones();
+    if (editingId.value === id) clean();
   } catch (error) {
     console.log(error);
   }
@@ -147,6 +231,7 @@ onMounted(() => {
   listarStatus();
 });
 </script>
+
 <template>
   <div class="container position-sticky z-index-sticky top-0">
     <div class="row">
@@ -203,7 +288,7 @@ onMounted(() => {
                       id="contact-form"
                       method="post"
                       autocomplete="off"
-                      @submit.prevent="onsubmit"
+                      @submit.prevent="createOrUpdateFumigation"
                     >
                       <div class="card-body">
                         <div class="row">
@@ -344,9 +429,13 @@ onMounted(() => {
                                 variant="gradient"
                                 color="success"
                                 fullWidth
-                                @click="createFumigation"
+                                type="submit"
                               >
-                                Registrar
+                                {{ editingId ? "Actualizar" : "Registrar" }}
+                              </MaterialButton>
+                              <MaterialButton v-if="editingId" class="my-4 mb-2" variant="outlined" color="dark" fullWidth
+                                @click="clean">
+                                Cancelar edición
                               </MaterialButton>
                             </div>
                           </div>
@@ -364,7 +453,7 @@ onMounted(() => {
                   style="
                     margin-top: 60px;
                     margin-left: 30px;
-                    padding: 50px 20px 15px 5px; /* arriba, derecha, abajo, izquierda */
+                    padding: 50px 20px 15px 5px;
                   "
                 >
                   <div
@@ -387,11 +476,7 @@ onMounted(() => {
                         margin-left: 15px;
                       "
                     >
-                      <table
-                        class="table table-striped"
-                        :items="listFumigations"
-                        :fields="fieldsFumigations"
-                      >
+                      <table class="table table-striped">
                         <thead>
                           <tr>
                             <th scope="col">#</th>
@@ -399,18 +484,32 @@ onMounted(() => {
                             <th scope="col">Teléfono</th>
                             <th scope="col">Fecha de fumigación</th>
                             <th scope="col">Dirección</th>
+                            <th scope="col">Acciones</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr
-                            v-for="(lf, i) in listFumigations"
-                            v-bind:key="lf.id"
-                          >
+                          <tr v-for="(lf, i) in listFumigations" :key="lf.id">
                             <td>{{ lf.id }}</td>
                             <td>{{ lf.client_name }}</td>
                             <td>{{ lf.client_phone }}</td>
                             <td>{{ lf.fumigation_date }}</td>
                             <td>{{ lf.destination_place }}</td>
+                            <td>
+                              <button class="btn btn-link p-0 me-2" @click="editFumigation(lf)" title="Editar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.232 5.232l3.536 3.536M9 13.5V17h3.5l7.036-7.036a2.002 2.002 0 0 0 0-2.828l-3.672-3.672a2.002 2.002 0 0 0-2.828 0L9 7.5z" />
+                                </svg>
+                              </button>
+                              <button class="btn btn-link p-0" @click="deleteFumigation(lf.id)" title="Eliminar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5-4h4a2 2 0 0 1 2 2v2H7V5a2 2 0 0 1 2-2zm-4 4h12"/>
+                                </svg>
+                              </button>
+                            </td>
                           </tr>
                         </tbody>
                       </table>
