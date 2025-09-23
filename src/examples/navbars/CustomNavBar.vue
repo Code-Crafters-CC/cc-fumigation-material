@@ -3,7 +3,16 @@ import { computed } from 'vue';
 import { useAppStore } from '@/stores/index';
 
 const store = useAppStore();
-const isAdmin = computed(() => store.rol === 'Admin' || store.rol === 'admin'); 
+
+const canSeeCrud = computed(() => {
+    // Solo muestra CRUDs si está autenticado y es Administrador o Fumigador
+    if (!store.isAuthenticated) return false;
+    if (!store.rol) return false;
+    const rol = store.rol.toLowerCase();
+    return rol === 'administrador' || rol === 'fumigador';
+});
+
+const isAuthenticated = computed(() => store.isAuthenticated);
 </script>
 
 <template>
@@ -25,16 +34,17 @@ const isAdmin = computed(() => store.rol === 'Admin' || store.rol === 'admin');
                         <li><a class="dropdown-item" href="#vision">Visión</a></li>
                     </ul>
                 </li>
-                <li class="nav-item" v-if="!isAdmin">
+                <!-- Menús solo si NO está autenticado -->
+                <li class="nav-item" v-if="!isAuthenticated">
                     <RouterLink :to="{ name: 'signin-basic' }" class="nav-link">
                         Login
                     </RouterLink>
                 </li>
-                <li class="nav-item" v-if="!isAdmin">
+                <li class="nav-item" v-if="!isAuthenticated">
                     <a class="nav-link" href="https://wa.me/502XXXXXXXX" target="_blank">Soporte</a>
                 </li>
-                <!-- Menú hamburguesa solo para Admin -->
-                <li v-if="isAdmin" class="nav-item dropdown ms-3">
+                <!-- Menú hamburguesa solo para Admin y Fumigador autenticados -->
+                <li v-if="canSeeCrud" class="nav-item dropdown ms-3">
                     <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <i class="fas fa-bars"></i> Servicios
@@ -47,7 +57,8 @@ const isAdmin = computed(() => store.rol === 'Admin' || store.rol === 'admin');
                             <RouterLink class="dropdown-item" :to="{ name: 'plagues' }">Registro de Plagas</RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones</RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones
+                            </RouterLink>
                         </li>
                     </ul>
                 </li>

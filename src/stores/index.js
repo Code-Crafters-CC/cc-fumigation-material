@@ -1,8 +1,8 @@
 import bootstrap from "bootstrap/dist/js/bootstrap.min.js";
 import { defineStore } from 'pinia'
 import router from '../router/index'
+import "@/interceptors/axios"
 
-const TOKEN_EXP_KEY = 'token_exp';
 const TOKEN_KEY = 'token';
 const ROL_KEY = 'rol';
 
@@ -28,10 +28,8 @@ export const useAppStore = defineStore("auth", {
   }),
   actions: {
     guardarToken(token) {
-      this.token = token; // Save object (access, refresh)
-      const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24h
+      this.token = token; 
       localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
-      localStorage.setItem(TOKEN_EXP_KEY, expiresAt);
     },
     guardarRol(rol) {
       this.rol = rol;
@@ -46,7 +44,6 @@ export const useAppStore = defineStore("auth", {
         if (!isTokenExpired(token)) {
           this.token = token;
           this.rol = rol;
-          router.push({ name: "about" });
           return;
         }
       }
@@ -57,7 +54,6 @@ export const useAppStore = defineStore("auth", {
       this.rol = null;
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(ROL_KEY);
-      localStorage.removeItem(TOKEN_EXP_KEY);
       router.push({ name: "login" });
     },
     checkTokenOrLogout() {
@@ -67,5 +63,8 @@ export const useAppStore = defineStore("auth", {
       }
       return true;
     }
+  },
+  getters: {
+    isAuthenticated: (state) => !!state.token && !isTokenExpired(state.token),
   },
 });
