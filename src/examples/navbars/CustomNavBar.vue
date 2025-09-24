@@ -4,15 +4,15 @@ import { useAppStore } from '@/stores/index';
 
 const store = useAppStore();
 
-const canSeeCrud = computed(() => {
-    // Solo muestra CRUDs si está autenticado y es Administrador o Fumigador
-    if (!store.isAuthenticated) return false;
-    if (!store.rol) return false;
-    const rol = store.rol.toLowerCase();
-    return rol === 'administrador' || rol === 'fumigador';
+const isAuthenticated = computed(() => store.isAuthenticated);
+
+const isAdmin = computed(() => {
+    return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'administrador';
 });
 
-const isAuthenticated = computed(() => store.isAuthenticated);
+const isFumigator = computed(() => {
+    return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'fumigador';
+});
 </script>
 
 <template>
@@ -43,13 +43,19 @@ const isAuthenticated = computed(() => store.isAuthenticated);
                 <li class="nav-item" v-if="!isAuthenticated">
                     <a class="nav-link" href="https://wa.me/502XXXXXXXX" target="_blank">Soporte</a>
                 </li>
+
                 <!-- Menú hamburguesa solo para Admin y Fumigador autenticados -->
-                <li v-if="canSeeCrud" class="nav-item dropdown ms-3">
+                <li v-if="isAdmin || isFumigator" class="nav-item dropdown ms-3">
                     <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <i class="fas fa-bars"></i> Servicios
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminMenu">
+                        <!-- CRUD Usuarios SOLO para Administrador -->
+                        <li v-if="isAdmin">
+                            <RouterLink class="dropdown-item" :to="{ name: 'users' }">Control de Usuarios</RouterLink>
+                        </li>
+                        <!-- Servicios para ambos -->
                         <li>
                             <RouterLink class="dropdown-item" :to="{ name: 'products' }">Crear Producto</RouterLink>
                         </li>
@@ -57,8 +63,10 @@ const isAuthenticated = computed(() => store.isAuthenticated);
                             <RouterLink class="dropdown-item" :to="{ name: 'plagues' }">Registro de Plagas</RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones
-                            </RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones</RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones</RouterLink>
                         </li>
                     </ul>
                 </li>
