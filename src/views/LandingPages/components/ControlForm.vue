@@ -181,7 +181,6 @@ const editFumigation = (fumigation) => {
   fumigation_date.value = formatDateForInput(fumigation.fumigation_date);
   destination_place.value = fumigation.destination_place;
   total_products.value = fumigation.total_products;
-  // --- CORREGIDO: ASIGNA SOLO EL ID, NO EL OBJETO ---
   plague.value =
     typeof fumigation.plague === "object" && fumigation.plague !== null
       ? fumigation.plague.id

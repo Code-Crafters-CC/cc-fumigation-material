@@ -30,8 +30,21 @@ const isFumigator = computed(() => {
                         ¿Quiénes Somos?
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#mision">Misión</a></li>
-                        <li><a class="dropdown-item" href="#vision">Visión</a></li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'about-fumigation-system' }">
+                                ¿Qué es Fumigations System?
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'mission' }">
+                                Misión
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'vision' }">
+                                Visión
+                            </RouterLink>
+                        </li>
                     </ul>
                 </li>
                 <!-- Menús solo si NO está autenticado -->
@@ -63,10 +76,12 @@ const isFumigator = computed(() => {
                             <RouterLink class="dropdown-item" :to="{ name: 'plagues' }">Registro de Plagas</RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones</RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones
+                            </RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones</RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones
+                            </RouterLink>
                         </li>
                     </ul>
                 </li>
