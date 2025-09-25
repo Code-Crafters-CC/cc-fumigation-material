@@ -184,7 +184,7 @@ onMounted(() => {
                               placeholder="ej. 199.99" />
                           </div>
                           <div class="mb-4">
-                            <label for="rol" class="form-label">Selecciona el tipo de producto a utilizar</label>
+                            <label for="rol" class="form-label">Selecciona el tipo de producto</label>
                             <select v-model="product_type" id="productType" class="form-select" :items="listProductType"
                               :fields="fieldsProduct">
                               <option v-for="lp in listProductType" v-bind:key="lp.id" v-bind:value="lp.id">
