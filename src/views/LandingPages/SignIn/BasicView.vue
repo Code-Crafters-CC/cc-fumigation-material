@@ -2,14 +2,12 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import router from "../../../router/index";
-import {useAppStore} from '../../../stores/index'
+import { useAppStore } from "../../../stores/index";
 // example components
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import Header from "@/examples/Header.vue";
 
 //Vue Material Kit 2 components
-import MaterialInput from "@/components/MaterialInput.vue";
-import MaterialSwitch from "@/components/MaterialSwitch.vue";
 import MaterialButton from "@/components/MaterialButton.vue";
 
 // material-input
@@ -50,7 +48,7 @@ const createUser = async () => {
       email: email.value,
       password: password.value,
       rol: rol.value
-    }); 
+    });
     console.log(response);
 
     toggleForms();
@@ -69,6 +67,7 @@ const login = async () => {
 
     const appStore = useAppStore();
     appStore.guardarToken(response.data);
+    console.log("Token:", response.data);
 
     const access = response.data.access;
     const decoded = jwtDecode(access);

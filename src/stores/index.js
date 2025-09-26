@@ -5,8 +5,8 @@ import router from '../router/index'
 export const useAppStore = defineStore('auth', {
   state: () => ({
     bootstrap,
-    token: null,     
-    rol: null        
+    token: null,
+    rol: null,
   }),
   actions: {
     guardarToken(token) {
@@ -34,6 +34,6 @@ export const useAppStore = defineStore('auth', {
       localStorage.removeItem('token');
       localStorage.removeItem('rol');
       router.push({ name: 'login' });
-    }
-  }
+    },
+  },
 });

@@ -26,6 +26,7 @@ import ControlForm from "../views/LandingPages/components/ControlForm.vue";
 import ShowUsers from '../views/LandingPages/components/ShowUsers.vue';
 import Products from "../views/LandingPages/components/Products.vue";
 import Plagues from "../views/LandingPages/components/Plagues.vue";
+import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +70,11 @@ const router = createRouter({
       path: "/pages/plagues",
       name: "plagues",
       component: Plagues,
+    },
+    {
+      path: "/pages/price-calculator",
+      name: "price-calculator",
+      component: PriceCalculator,
     },
     {
       path: "/sections/page-sections/page-headers",
