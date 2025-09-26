@@ -31,6 +31,7 @@ import AboutFumigationSystem from "../views/LandingPages/components/AboutFumigat
 import Mission from "../views/LandingPages/components/Mission.vue";
 import Vision from "../views/LandingPages/components/Vision.vue";
 
+import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
