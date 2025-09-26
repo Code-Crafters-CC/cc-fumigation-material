@@ -13,6 +13,12 @@ const isAdmin = computed(() => {
 const isFumigator = computed(() => {
     return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'fumigador';
 });
+
+const isClient = computed(() => {
+    return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'cliente';
+});
+
+
 </script>
 
 <template>
@@ -57,7 +63,6 @@ const isFumigator = computed(() => {
                     <a class="nav-link" href="https://wa.me/502XXXXXXXX" target="_blank">Soporte</a>
                 </li>
 
-                <!-- Menú hamburguesa solo para Admin y Fumigador autenticados -->
                 <li v-if="isAdmin || isFumigator" class="nav-item dropdown ms-3">
                     <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
@@ -85,6 +90,29 @@ const isFumigator = computed(() => {
                         </li>
                     </ul>
                 </li>
+                <!-- Solo para clientes autenticados -->
+                <li v-if="isClient" class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        Mi cuenta
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'client-profile' }">
+                                Mi perfil
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'client-request-fumigation' }">
+                                Solicitar Fumigación
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'client-my-fumigations' }">
+                                Mis Fumigaciones
+                            </RouterLink>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </nav>
@@ -93,5 +121,9 @@ const isFumigator = computed(() => {
 <style scoped>
 .system-name {
     letter-spacing: 2px;
+}
+
+.navbar .dropdown-menu {
+    min-width: 200px;
 }
 </style>

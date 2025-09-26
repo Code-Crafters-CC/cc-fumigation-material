@@ -29,6 +29,9 @@ import Plagues from "../views/LandingPages/components/Plagues.vue";
 import AboutFumigationSystem from "../views/LandingPages/components/AboutFumigationSystem.vue"; 
 import Mission from "../views/LandingPages/components/Mission.vue";
 import Vision from "../views/LandingPages/components/Vision.vue";
+import MyFumigations from "../views/clientsModule/MyFumigations.vue";
+import Profile from "../views/clientsModule/Profile.vue";
+import RequestFumigation from "../views/clientsModule/RequestFumigation.vue";
 
 
 const router = createRouter({
@@ -183,6 +186,21 @@ const router = createRouter({
       path: "/pages/vision",
       name: "vision",
       component: Vision,
+    },
+    {
+      path: "/pages/client-profile",
+      name: "client-profile",
+      component: Profile,
+    },
+    {
+      path: "/pages/client-request-fumigation",
+      name: "client-request-fumigation",
+      component: RequestFumigation,
+    },
+    {
+      path: "/pages/client-my-fumigations",
+      name: "client-my-fumigations",
+      component: MyFumigations,
     }
   ],
 });
