@@ -1,17 +1,25 @@
 <script setup>
-import { computed } from 'vue';
-import { useAppStore } from '@/stores/index';
+import { computed } from "vue";
+import { useAppStore } from "@/stores/index";
 
 const store = useAppStore();
 
 const isAuthenticated = computed(() => store.isAuthenticated);
 
 const isAdmin = computed(() => {
-    return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'administrador';
+  return (
+    store.isAuthenticated &&
+    store.rol &&
+    store.rol.toLowerCase() === "administrador"
+  );
 });
 
 const isFumigator = computed(() => {
-    return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'fumigador';
+  return (
+    store.isAuthenticated &&
+    store.rol &&
+    store.rol.toLowerCase() === "fumigador"
+  );
 });
 </script>
 
@@ -68,6 +76,13 @@ const isFumigator = computed(() => {
                         <li v-if="isAdmin">
                             <RouterLink class="dropdown-item" :to="{ name: 'users' }">Control de Usuarios</RouterLink>
                         </li>
+                        <!-- Calculadora de Precios SOLO para Administrador -->
+                        <li v-if="isAdmin">
+                            <RouterLink class="dropdown-item" :to="{ name: 'price-calculator' }">
+                                <i class="fas fa-calculator me-1"></i>
+                                Calculadora de Precios
+                            </RouterLink>
+                        </li>
                         <!-- Servicios para ambos -->
                         <li>
                             <RouterLink class="dropdown-item" :to="{ name: 'products' }">Crear Producto</RouterLink>
@@ -89,12 +104,6 @@ const isFumigator = computed(() => {
         </div>
     </nav>
 </template>
-
-<script setup>
-import { useAppStore } from "@/stores/index.js";
-
-const authStore = useAppStore();
-</script>
 
 <style scoped>
 .system-name {

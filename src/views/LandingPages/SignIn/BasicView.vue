@@ -2,7 +2,6 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import router from "../../../router/index";
-import {useAppStore} from '../../../stores/index'
 import { useAppStore } from "../../../stores/index";
 // example components
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
@@ -12,6 +11,7 @@ import Header from "@/examples/Header.vue";
 import MaterialButton from "@/components/MaterialButton.vue";
 import setMaterialInput from "@/assets/js/material-input";
 import { jwtDecode } from "jwt-decode";
+import StockNotificationService from "@/data/StockNotificationService.js";
 
 const first_name = ref("");
 const last_name = ref("");
@@ -21,7 +21,8 @@ const showLogin = ref(true);
 const showRegister = ref(false);
 const emailLogin = ref("");
 const passwordLogin = ref("");
-
+const password = ref("");
+const rol = ref(2); // Rol por defecto: Administrador
 
 const sendUserRequest = async () => {
   try {
@@ -31,7 +32,7 @@ const sendUserRequest = async () => {
       username: username.value,
       email: email.value,
       password: password.value,
-      rol: rol.value
+      rol: rol.value,
     });
     console.log(response);
 
@@ -64,10 +65,26 @@ const login = async () => {
     console.log('Rol:', decoded.rol);
 
     appStore.guardarRol(decoded.rol);
+    
+    // Verificar niveles de stock para administradores después del login
+    if (decoded.rol === 2 || decoded.rol === "2" || decoded.rol === "Administrador") {
+      // Esperar un poco para que el componente de notificaciones esté listo
+      setTimeout(() => {
+        StockNotificationService.checkAndNotifyStockLevels(decoded.rol);
+      }, 1000);
+    }
+    
     router.push({ name: 'about' });
 
   } catch (error) {
     console.log(error);
+    // Mostrar notificación de error en el login
+    StockNotificationService.addCustomNotification(
+      "Error de Login",
+      "Credenciales incorrectas. Verifica tu email y contraseña.",
+      "danger",
+      "fas fa-exclamation-circle"
+    );
   }
 }
 
