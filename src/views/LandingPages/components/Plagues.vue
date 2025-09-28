@@ -14,11 +14,17 @@ const listPlagues = ref([]);
 const fieldsPlagues = ref([
   "id",
   "plague_name",
+  "description",
   "insert_date",
-  "plague_type"
+  "plague_type",
+  "recommended_products"
 ]);
 const plagueName = ref("");
 const plagueType = ref("");
+const description = ref("");
+const recommendedProducts = ref([]);
+const listProducts = ref([]);
+
 const fieldsPlagueType = ref(["id", "plague_type_name"]);
 const listPlagueType = ref([]);
 const editingId = ref(null);
@@ -26,19 +32,24 @@ const editingId = ref(null);
 const clear = () => {
   plagueName.value = "";
   plagueType.value = "";
+  description.value = "";
+  recommendedProducts.value = [];
   editingId.value = null;
 };
 
 const createOrUpdatePlague = async () => {
   try {
+    const payload = {
+      plague_name: plagueName.value,
+      plague_type: plagueType.value,
+      description: description.value,
+      recommended_products: recommendedProducts.value,
+    };
     if (editingId.value) {
       // PATCH
       await axios.patch(
         `plague/${editingId.value}/`,
-        {
-          plague_name: plagueName.value,
-          plague_type: plagueType.value
-        },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${store.token.access}`,
@@ -49,10 +60,7 @@ const createOrUpdatePlague = async () => {
       // POST
       await axios.post(
         "plague/",
-        {
-          plague_name: plagueName.value,
-          plague_type: plagueType.value
-        },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${store.token.access}`,
@@ -93,11 +101,27 @@ const listarPlagueType = async () => {
   }
 };
 
+const listarProductos = async () => {
+  try {
+    const response = await axios.get("product/", {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
+    listProducts.value = response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const editPlague = (plague) => {
   editingId.value = plague.id;
   plagueName.value = plague.plague_name;
-  // Si plague_type es un objeto, usa su id, si es un id ya, úsalo directo
   plagueType.value = plague.plague_type.id ?? plague.plague_type;
+  description.value = plague.description || "";
+  recommendedProducts.value = Array.isArray(plague.recommended_products)
+    ? plague.recommended_products.map(p => typeof p === "object" ? p.id : p)
+    : [];
 };
 
 const deletePlague = async (id) => {
@@ -119,11 +143,11 @@ onMounted(() => {
   setMaterialInput();
   listPlague();
   listarPlagueType();
+  listarProductos();
 });
 </script>
 
 <template>
-  <!-- FontAwesome debe estar en tu index.html -->
   <div class="container position-sticky z-index-sticky top-0">
     <div class="row">
       <div class="col-12">
@@ -184,7 +208,17 @@ onMounted(() => {
                               placeholder="ej. Cucarachas"
                             />
                           </div>
-                          <div class="mb-4">
+                          <div class="col-md-6">
+                            <label class="form-label">Descripción</label>
+                            <textarea
+                              v-model="description"
+                              class="form-control"
+                              type="text"
+                              placeholder="Describe la plaga"
+                              rows="2"
+                            />
+                          </div>
+                          <div class="col-md-12 mt-2">
                             <label for="rol" class="form-label">Selecciona el tipo de plaga</label>
                             <select
                               v-model="plagueType"
@@ -201,21 +235,38 @@ onMounted(() => {
                                 {{ lpt.plague_type_name}}
                               </option>
                             </select>
-                            <div class="text-center">
-                              <MaterialButton
-                                class="my-4 mb-2"
-                                variant="gradient"
-                                color="success"
-                                fullWidth
-                                type="submit"
+                          </div>
+                          <div class="col-md-12 mt-2">
+                            <label for="recommended_products" class="form-label">Productos recomendados</label>
+                            <select
+                              v-model="recommendedProducts"
+                              multiple
+                              id="recommended_products"
+                              class="form-select"
+                            >
+                              <option
+                                v-for="prod in listProducts"
+                                :key="prod.id"
+                                :value="prod.id"
                               >
-                                {{ editingId ? "Actualizar" : "Registrar" }}
-                              </MaterialButton>
-                              <MaterialButton v-if="editingId" class="my-4 mb-2" variant="outlined" color="dark" fullWidth
-                                @click="clear">
-                                Cancelar edición
-                              </MaterialButton>
-                            </div>
+                                {{ prod.product_name }}
+                              </option>
+                            </select>
+                          </div>
+                          <div class="text-center col-md-12 mt-3">
+                            <MaterialButton
+                              class="my-4 mb-2"
+                              variant="gradient"
+                              color="success"
+                              fullWidth
+                              type="submit"
+                            >
+                              {{ editingId ? "Actualizar" : "Registrar" }}
+                            </MaterialButton>
+                            <MaterialButton v-if="editingId" class="my-4 mb-2" variant="outlined" color="dark" fullWidth
+                              @click="clear">
+                              Cancelar edición
+                            </MaterialButton>
                           </div>
                         </div>
                       </div>
@@ -225,7 +276,7 @@ onMounted(() => {
               </div>
 
               <!-- PLAGUES LIST -->
-              <div class="col-md-8 col-xl-7 d-flex flex-column mx-auto mt-4 mt-md-0">
+              <div class="mt-3 col-xl-7 col-lg-8 col-md-9 d-flex flex-column ms-auto me-auto ms-lg-auto me-sm-0">
                 <div
                   class="card d-flex blur justify-content-center shadow-lg my-sm-0 my-sm-6 mt-8 mb-5"
                   style="margin-top: 60px; margin-left: 30px; padding: 50px 20px 15px 5px;"
@@ -243,8 +294,10 @@ onMounted(() => {
                           <tr>
                             <th scope="col">#</th>
                             <th scope="col">Plaga</th>
+                            <th scope="col">Descripción</th>
                             <th scope="col">Tipo de Plaga</th>
                             <th scope="col">Fecha de creación</th>
+                            <th scope="col">Productos recomendados</th>
                             <th scope="col">Acciones</th>
                           </tr>
                         </thead>
@@ -252,8 +305,16 @@ onMounted(() => {
                           <tr v-for="(lP, i) in listPlagues" :key="lP.id">
                             <td>{{ lP.id }}</td>
                             <td>{{ lP.plague_name }}</td>
-                            <td>{{ lP.plague_type['plague_type_name'] }}</td>
+                            <td>{{ lP.description }}</td>
+                            <td>{{ lP.plague_type?.plague_type_name || '' }}</td>
                             <td>{{ lP.insert_date }}</td>
+                            <td>
+                              <ul style="margin: 0; padding-left: 15px;">
+                                <li v-for="prod in lP.recommended_products" :key="prod.id">
+                                  {{ prod.product_name }}
+                                </li>
+                              </ul>
+                            </td>
                             <td>
                               <button class="btn btn-link p-0 me-2" @click="editPlague(lP)" title="Editar">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"

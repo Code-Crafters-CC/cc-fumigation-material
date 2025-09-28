@@ -19,8 +19,8 @@ const DeleteIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="1
 const store = useAppStore();
 const listFumigations = ref([]);
 const statusOptions = ref([]);
+const listProducts = ref([]);
 
-// Traducción de status_name a español
 const statusTranslation = {
   "REQUESTED": "Solicitado",
   "IN_PROGRESS": "En progreso",
@@ -29,9 +29,10 @@ const statusTranslation = {
 };
 
 const editingId = ref(null);
-const editingStatus = ref(""); // Aquí irá el id del status seleccionado
+const editingStatus = ref("");
+const editingProductUsed = ref(""); // Cantidad utilizada
+const editingProductId = ref(""); // Producto sugerido (id)
 
-// Cargar status desde backend
 const fetchStatusOptions = async () => {
   try {
     const res = await axios.get("/status/", {
@@ -57,27 +58,50 @@ const listarFumigaciones = async () => {
   }
 };
 
+const listarProductos = async () => {
+  try {
+    const response = await axios.get("product/", {
+      headers: { Authorization: `Bearer ${store.token.access}` },
+    });
+    listProducts.value = response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const startEdit = (fumigation) => {
   editingId.value = fumigation.id;
-  editingStatus.value = fumigation.status; // status es el ID, no el nombre
+  editingStatus.value = fumigation.status; // status es el ID
+  editingProductUsed.value = fumigation.product_used || ""; // cantidad utilizada
+  editingProductId.value = fumigation.product_suggested?.id || "";
 };
 
 const cancelEdit = () => {
   editingId.value = null;
   editingStatus.value = "";
+  editingProductUsed.value = "";
+  editingProductId.value = "";
 };
 
 const saveEdit = async (fumigationId) => {
   try {
-    await axios.patch(`fumigationRequest/${fumigationId}/`, 
-      { status: editingStatus.value },
+    let payload = {
+      status: editingStatus.value,
+      product_suggested: editingProductId.value || null,
+    };
+    // Solo enviar cantidad utilizada si status es COMPLETED
+    const statusObj = statusOptions.value.find(s => s.value === editingStatus.value);
+    if (statusObj && statusObj.label === "Completado") {
+      payload.product_used = editingProductUsed.value;
+    }
+    await axios.patch(`fumigationRequest/${fumigationId}/`,
+      payload,
       { headers: { Authorization: `Bearer ${store.token.access}` } }
     );
-    editingId.value = null;
-    editingStatus.value = "";
+    cancelEdit();
     await listarFumigaciones();
   } catch (error) {
-    alert("No se pudo actualizar el status.");
+    alert("No se pudo actualizar la solicitud.");
     console.log(error);
   }
 };
@@ -96,8 +120,12 @@ const deleteFumigation = async (fumigationId) => {
 };
 
 onMounted(async () => {
+  if (!store.token?.access && window.localStorage.getItem('token')) {
+    store.token = JSON.parse(window.localStorage.getItem('token'));
+  }
   await fetchStatusOptions();
   await listarFumigaciones();
+  await listarProductos();
 });
 </script>
 
@@ -113,16 +141,17 @@ onMounted(async () => {
     <div class="page-header min-vh-100">
       <div class="container">
         <div class="row justify-content-center">
-          <div class="col-md-10 d-flex flex-column mx-auto mt-4 mt-md-0">
+          <div class="col-md-12 d-flex flex-column mx-auto mt-4 mt-md-0">
             <div class="card d-flex blur justify-content-center shadow-lg my-sm-0 my-sm-6 mt-8 mb-5"
-                style="margin-top: 60px; margin-left: 30px; padding: 50px 20px 15px 5px;">
+              style="margin-top: 60px; margin-left: 30px; padding: 50px 20px 15px 5px;">
               <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
                 <div class="bg-gradient-success shadow-success border-radius-lg p-3">
                   <h3 class="text-white text-success mb-0">Solicitudes de Fumigación</h3>
                 </div>
               </div>
               <div class="card-body">
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 10px; margin-left: 15px;">
+                <div class="table-responsive"
+                  style="max-height: 400px; overflow-y: auto; margin-top: 10px; margin-left: 15px;">
                   <table class="table table-striped">
                     <thead>
                       <tr>
@@ -131,6 +160,9 @@ onMounted(async () => {
                         <th>Fecha solicitada</th>
                         <th>Dirección</th>
                         <th>Plaga</th>
+                        <th>Producto utilizado</th>
+                        <th>Tipo de producto</th>
+                        <th>Cantidad utilizada</th>
                         <th>Status</th>
                         <th>Acciones</th>
                       </tr>
@@ -142,9 +174,48 @@ onMounted(async () => {
                         <td>{{ lf.requested_date }}</td>
                         <td>{{ lf.address }}</td>
                         <td>{{ lf.plague_name }}</td>
+
+                        <!-- Producto utilizado -->
                         <td>
                           <template v-if="editingId === lf.id">
-                            <select v-model="editingStatus" class="form-select form-select-sm" style="width: 140px; display: inline-block;">
+                            <select v-model="editingProductId" class="form-select form-select-sm" style="width:120px;">
+                              <option v-for="p in listProducts" :value="p.id" :key="p.id">{{ p.product_name }}</option>
+                            </select>
+                          </template>
+                          <template v-else>
+                            {{ lf.product_name || "Sin producto" }}
+                          </template>
+                        </td>
+
+                        <!-- Tipo de producto -->
+                        <td>
+                          <template v-if="editingId === lf.id">
+                            {{listProducts.find(p => p.id === editingProductId)?.product_type?.product_type_name ||
+                            "Sin tipo" }}
+                          </template>
+                          <template v-else>
+                            {{ lf.product_type_name || "Sin tipo" }}
+                          </template>
+                        </td>
+
+                        <!-- Cantidad utilizada -->
+                        <td>
+                          <template
+                            v-if="editingId === lf.id && statusOptions.find(s => s.value === editingStatus)?.label === 'Completado'">
+                            <input v-model="editingProductUsed" type="number" min="0" step="0.01"
+                              class="form-control form-control-sm" style="width: 90px; display: inline-block;"
+                              placeholder="Cantidad" />
+                          </template>
+                          <template v-else>
+                            {{ lf.product_used ?? "-" }}
+                          </template>
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                          <template v-if="editingId === lf.id">
+                            <select v-model="editingStatus" class="form-select form-select-sm"
+                              style="width: 140px; display: inline-block;">
                               <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
                                 {{ opt.label }}
                               </option>
@@ -154,6 +225,8 @@ onMounted(async () => {
                             {{ statusTranslation[lf.status_name] || lf.status_name }}
                           </template>
                         </td>
+
+                        <!-- Acciones -->
                         <td>
                           <span v-if="editingId === lf.id">
                             <button class="btn btn-link p-0 me-2 text-success" @click="saveEdit(lf.id)" title="Guardar">
@@ -164,8 +237,10 @@ onMounted(async () => {
                             </button>
                           </span>
                           <span v-else>
-                            <button class="btn btn-link p-0 me-2" @click="startEdit(lf)" title="Editar status" v-html="EditIcon"></button>
-                            <button class="btn btn-link p-0" @click="deleteFumigation(lf.id)" title="Eliminar" v-html="DeleteIcon"></button>
+                            <button class="btn btn-link p-0 me-2" @click="startEdit(lf)" title="Editar"
+                              v-html="EditIcon"></button>
+                            <button class="btn btn-link p-0" @click="deleteFumigation(lf.id)" title="Eliminar"
+                              v-html="DeleteIcon"></button>
                           </span>
                         </td>
                       </tr>

@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useAppStore } from '@/stores/index';
 
-//example components
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import DefaultFooter from "@/examples/footers/FooterDefault.vue";
 import MaterialButton from "@/components/MaterialButton.vue";
@@ -11,13 +10,16 @@ import setMaterialInput from "@/assets/js/material-input";
 import image from "@/assets/img/illustrations/illustration-signin.jpg";
 
 const listProducts = ref([]);
-const fields = ref(["id", "product_name", "stock", "price", "product_type"]);
+const fields = ref([
+  "id", "product_name", "stock", "price", "product_type", "provider"
+]);
 const fieldsProduct = ref(["id", "product_type_name"]);
 
 const product_name = ref("");
 const stock = ref("");
 const price = ref("");
 const product_type = ref("");
+const provider = ref(""); // Nuevo campo
 const listProductType = ref([]);
 const store = useAppStore();
 
@@ -28,45 +30,41 @@ const clean = async () => {
   stock.value = "";
   price.value = "";
   product_type.value = "";
+  provider.value = "";
   editingId.value = null;
 };
 
 const createOrUpdateProduct = async () => {
   try {
+    const payload = {
+      product_name: product_name.value,
+      stock: stock.value,
+      price: price.value,
+      product_type: product_type.value,
+      provider: provider.value,
+    };
     if (editingId.value) {
       // PATCH
-      const response = await axios.patch(
+      await axios.patch(
         `product/${editingId.value}/`,
-        {
-          product_name: product_name.value,
-          stock: stock.value,
-          price: price.value,
-          product_type: product_type.value,
-        },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${store.token.access}`,
           },
         }
       );
-      console.log(response);
     } else {
       // POST
-      const response = await axios.post(
+      await axios.post(
         "product/",
-        {
-          product_name: product_name.value,
-          stock: stock.value,
-          price: price.value,
-          product_type: product_type.value,
-        },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${store.token.access}`,
           },
         }
       );
-      console.log(response);
     }
     await listarProductos();
     clean();
@@ -106,7 +104,8 @@ const editProduct = (product) => {
   product_name.value = product.product_name;
   stock.value = product.stock;
   price.value = product.price;
-  product_type.value = product.product_type.id ?? product.product_type; // Para compatibilidad según cómo venga el dato
+  product_type.value = product.product_type.id ?? product.product_type;
+  provider.value = product.provider ?? "";
 };
 
 const deleteProduct = async (id) => {
@@ -118,7 +117,7 @@ const deleteProduct = async (id) => {
       },
     });
     await listarProductos();
-    if (editingId.value === id) clean(); // Si estaba editando, limpia
+    if (editingId.value === id) clean();
   } catch (error) {
     console.log(error);
   }
@@ -154,7 +153,7 @@ onMounted(() => {
                 backgroundSize: 'cover',
               }" loading="lazy"></div>
           </div>
-          <!-- FUMIGATIONS REGISTER -->
+          <!-- PRODUCT REGISTER -->
           <div class="container py-4">
             <div class="row justify-content-center">
               <div class="col-md-5 d-flex flex-column mx-auto">
@@ -182,6 +181,10 @@ onMounted(() => {
                             <label class="form-label">Precio</label>
                             <input v-model="price" class="form-control" type="number" min="0" step="0.01"
                               placeholder="ej. 199.99" />
+                          </div>
+                          <div class="col-md-12 mt-3">
+                            <label class="form-label">Proveedor</label>
+                            <input v-model="provider" class="form-control" type="text" placeholder="ej. Agroquímicos XYZ" />
                           </div>
                           <div class="mb-4">
                             <label for="rol" class="form-label">Selecciona el tipo de producto</label>
@@ -228,6 +231,7 @@ onMounted(() => {
                             <th scope="col">Tipo de Producto</th>
                             <th scope="col">En Stock</th>
                             <th scope="col">Precio</th>
+                            <th scope="col">Proveedor</th>
                             <th scope="col">Alerta</th>
                             <th scope="col">Acciones</th>
                           </tr>
@@ -239,6 +243,7 @@ onMounted(() => {
                             <td>{{ lp.product_type["product_type_name"] }}</td>
                             <td>{{ lp.stock }}</td>
                             <td>{{ lp.price }}</td>
+                            <td>{{ lp.provider ?? '-' }}</td>
                             <td>
                               <div class="alert-warning" role="alert" v-if="lp.stock < 4 && lp.stock > 0">
                                 <div style="color: white; text-align: center">

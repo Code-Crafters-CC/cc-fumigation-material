@@ -19,7 +19,8 @@ const fields = ref([
   "username",
   "email",
   "insert_date",
-  "rol"
+  "rol",
+  "is_active"
 ]);
 
 const id = ref("");
@@ -118,16 +119,32 @@ const editUser = (user) => {
       : user.rol;
 };
 
-const deleteUser = async (id) => {
-  if (!confirm("¿Seguro que deseas eliminar este usuario?")) return;
+// Soft delete (desactivar usuario)
+const deactivateUser = async (id) => {
+  if (!confirm("¿Seguro que deseas desactivar este usuario?")) return;
   try {
-    await axios.delete(`users/${id}/`, {
+    await axios.patch(`users/${id}/`, { is_active: false }, {
       headers: {
         Authorization: `Bearer ${store.token.access}`,
       }
     });
     await listarUsuarios();
     if (editingId.value === id) clean();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Reactivar usuario
+const activateUser = async (id) => {
+  if (!confirm("¿Seguro que deseas reactivar este usuario?")) return;
+  try {
+    await axios.patch(`users/${id}/`, { is_active: true }, {
+      headers: {
+        Authorization: `Bearer ${store.token.access}`,
+      }
+    });
+    await listarUsuarios();
   } catch (error) {
     console.log(error);
   }
@@ -242,6 +259,7 @@ onMounted(() => {
                             <th scope="col">Correo</th>
                             <th scope="col">Fecha de ingreso</th>
                             <th scope="col">Rol</th>
+                            <th scope="col">Estado</th>
                             <th scope="col">Acciones</th>
                           </tr>
                         </thead>
@@ -254,6 +272,11 @@ onMounted(() => {
                             <td>{{ lU.insert_date }}</td>
                             <td>{{ lU.rol?.rol_name || lU.rol?.name || lU.rol }}</td>
                             <td>
+                              <span :class="lU.is_active ? 'text-success' : 'text-danger'">
+                                {{ lU.is_active ? "Activo" : "Inactivo" }}
+                              </span>
+                            </td>
+                            <td>
                               <button class="btn btn-link p-0 me-2" @click="editUser(lU)" title="Editar">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
                                   viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -261,11 +284,28 @@ onMounted(() => {
                                     d="M15.232 5.232l3.536 3.536M9 13.5V17h3.5l7.036-7.036a2.002 2.002 0 0 0 0-2.828l-3.672-3.672a2.002 2.002 0 0 0-2.828 0L9 7.5z" />
                                 </svg>
                               </button>
-                              <button class="btn btn-link p-0" @click="deleteUser(lU.id)" title="Eliminar">
+                              <button
+                                v-if="lU.is_active"
+                                class="btn btn-link p-0 text-danger"
+                                @click="deactivateUser(lU.id)"
+                                title="Desactivar usuario"
+                              >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
                                   viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                   <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5-4h4a2 2 0 0 1 2 2v2H7V5a2 2 0 0 1 2-2zm-4 4h12"/>
+                                </svg>
+                              </button>
+                              <button
+                                v-else
+                                class="btn btn-link p-0 text-success"
+                                @click="activateUser(lU.id)"
+                                title="Reactivar usuario"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M5 13l4 4L19 7" />
                                 </svg>
                               </button>
                             </td>
