@@ -79,6 +79,21 @@ export const useAppStore = defineStore("auth", {
         } else {
           console.log("[autoLogin] Token expirado, cerrando sesión.");
         }
+        this.token = JSON.parse(tokenStr);
+        this.rol = rol;
+        
+        // Verificar stock si es administrador al hacer auto-login
+        if (rol === "2" || rol === 2 || rol === "Administrador") {
+          // Importar dinámicamente para evitar problemas de dependencias circulares
+          import('@/data/StockNotificationService.js').then((module) => {
+            const StockNotificationService = module.default;
+            setTimeout(() => {
+              StockNotificationService.checkAndNotifyStockLevels(rol);
+            }, 1500);
+          });
+        }
+        
+        router.push({ name: 'about' });
       } else {
         console.log("[autoLogin] No hay token en localStorage.");
       }
@@ -86,6 +101,13 @@ export const useAppStore = defineStore("auth", {
     },
     salir() {
       console.log("[salir] Cerrando sesión.");
+      
+      // Detener monitoreo de stock al cerrar sesión
+      import("@/data/StockNotificationService.js").then((module) => {
+        const StockNotificationService = module.default;
+        StockNotificationService.stopMonitoring();
+      });
+      
       this.token = null;
       this.rol = null;
       localStorage.removeItem(TOKEN_KEY);

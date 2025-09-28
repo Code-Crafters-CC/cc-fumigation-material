@@ -17,8 +17,6 @@ const isFumigator = computed(() => {
 const isClient = computed(() => {
     return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'cliente';
 });
-
-
 </script>
 
 <template>
@@ -63,6 +61,7 @@ const isClient = computed(() => {
                     <a class="nav-link" href="https://wa.me/502XXXXXXXX" target="_blank">Soporte</a>
                 </li>
 
+                <!-- Menú hamburguesa solo para Admin y Fumigador autenticados -->
                 <li v-if="isAdmin || isFumigator" class="nav-item dropdown ms-3">
                     <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
@@ -72,6 +71,13 @@ const isClient = computed(() => {
                         <!-- CRUD Usuarios SOLO para Administrador -->
                         <li v-if="isAdmin">
                             <RouterLink class="dropdown-item" :to="{ name: 'users' }">Control de Usuarios</RouterLink>
+                        </li>
+                        <!-- Calculadora de Precios SOLO para Administrador -->
+                        <li v-if="isAdmin">
+                            <RouterLink class="dropdown-item" :to="{ name: 'price-calculator' }">
+                                <i class="fas fa-calculator me-1"></i>
+                                Calculadora de Precios
+                            </RouterLink>
                         </li>
                         <!-- Servicios para ambos -->
                         <li>
@@ -90,6 +96,7 @@ const isClient = computed(() => {
                         </li>
                     </ul>
                 </li>
+
                 <!-- Solo para clientes autenticados -->
                 <li v-if="isClient" class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

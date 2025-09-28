@@ -32,7 +32,7 @@ import Vision from "../views/LandingPages/components/Vision.vue";
 import MyFumigations from "../views/clientsModule/MyFumigations.vue";
 import Profile from "../views/clientsModule/Profile.vue";
 import RequestFumigation from "../views/clientsModule/RequestFumigation.vue";
-
+import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -76,6 +76,11 @@ const router = createRouter({
       path: "/pages/plagues",
       name: "plagues",
       component: Plagues,
+    },
+    {
+      path: "/pages/price-calculator",
+      name: "price-calculator",
+      component: PriceCalculator,
     },
     {
       path: "/sections/page-sections/page-headers",
