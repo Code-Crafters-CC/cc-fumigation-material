@@ -74,24 +74,21 @@ const isClient = computed(() => {
                         </li>
                         <!-- Calculadora de Precios SOLO para Administrador -->
                         <li v-if="isAdmin">
-                            <RouterLink class="dropdown-item" :to="{ name: 'price-calculator' }">
-                                <i class="fas fa-calculator me-1"></i>
-                                Calculadora de Precios
-                            </RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'price-calculator' }">Calculadora de Precios</RouterLink>
                         </li>
                         <!-- Servicios para ambos -->
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'products' }">Crear Producto</RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'products' }">Control de Productos</RouterLink>
                         </li>
                         <li>
                             <RouterLink class="dropdown-item" :to="{ name: 'plagues' }">Registro de Plagas</RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Registro de Fumigaciones
+                            <RouterLink class="dropdown-item" :to="{ name: 'controlForm' }">Control de Fumigaciones
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones
+                            <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones y consumo
                             </RouterLink>
                         </li>
                     </ul>

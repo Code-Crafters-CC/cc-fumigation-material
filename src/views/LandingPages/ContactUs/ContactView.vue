@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { useAppStore } from '@/stores/index'; // <-- Usa el store para el token
+import { useAppStore } from '@/stores/index';
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import DefaultFooter from "@/examples/footers/FooterDefault.vue";
 import setMaterialInput from "@/assets/js/material-input";
@@ -48,7 +48,7 @@ onMounted(() => {
             <div class="card d-flex blur justify-content-center shadow-lg my-sm-0 my-sm-6 mt-8 mb-5">
               <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
                 <div class="bg-gradient-success shadow-success border-radius-lg p-3">
-                  <h3 class="text-white text-success mb-0">Historial de consumo</h3>
+                  <h3 class="text-white text-success mb-0">Historial de fumigaciones y consumo</h3>
                 </div>
               </div>
               <!--contenido de historial de consumo-->
@@ -60,18 +60,18 @@ onMounted(() => {
                         <th scope="col">#</th>
                         <th scope="col">Producto utilizado</th>
                         <th scope="col">Tipo de producto</th>
-                        <th scope="col">Producto utilizado</th>
-                        <th scope="col">Producto restante</th>
+                        <th scope="col">Cantidad utilizada</th>
+                        <th scope="col">Cliente</th>
                         <th scope="col">Fecha de uso</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(lh, i) in listHistory" :key="lh.id">
                         <td>{{ lh.id }}</td>
-                        <td>{{ lh.product?.product_name || '-' }}</td>
-                        <td>{{ lh.product?.product_type?.product_type_name || '-' }}</td>
+                        <td>{{ lh.product_name || '-' }}</td>
+                        <td>{{ lh.product_type_name || '-' }}</td>
                         <td>{{ lh.used_stock ?? '-' }}</td>
-                        <td>{{ lh.product?.stock ?? '-' }}</td>
+                        <td>{{ lh.client_name }} {{ lh.client_lastname }}</td>
                         <td>{{ lh.insert_date }}</td>
                       </tr>
                     </tbody>
