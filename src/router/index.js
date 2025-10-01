@@ -34,6 +34,7 @@ import Profile from "../views/clientsModule/Profile.vue";
 import RequestFumigation from "../views/clientsModule/RequestFumigation.vue";
 import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vue";
 import ReportCenter from "../views/ReportCenter.vue";
+import FumigationCalendar from "../views/LandingPages/components/FumigationCalendar.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -207,10 +208,17 @@ const router = createRouter({
       path: "/pages/client-my-fumigations",
       name: "client-my-fumigations",
       component: MyFumigations,
+    },
+    {
       path: "/pages/reports",
       name: "reports",
       component: ReportCenter,
-    }
+    },
+    {
+      path: "/pages/fumigation-calendar",
+      name: "fumigation-calendar",
+      component: FumigationCalendar,
+    },
   ],
 });
 

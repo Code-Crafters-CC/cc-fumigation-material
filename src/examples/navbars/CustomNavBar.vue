@@ -98,6 +98,10 @@ const isClient = computed(() => {
                             <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones y consumo
                             </RouterLink>
                         </li>
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'fumigation-calendar' }">Calendario de Fumigaciones
+                            </RouterLink>
+                        </li>
                     </ul>
                 </li>
 
