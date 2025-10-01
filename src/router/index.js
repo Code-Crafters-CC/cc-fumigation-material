@@ -30,6 +30,7 @@ import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vu
 import AboutFumigationSystem from "../views/LandingPages/components/AboutFumigationSystem.vue"; 
 import Mission from "../views/LandingPages/components/Mission.vue";
 import Vision from "../views/LandingPages/components/Vision.vue";
+import ReportCenter from "../views/ReportCenter.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -188,6 +189,11 @@ const router = createRouter({
       path: "/pages/vision",
       name: "vision",
       component: Vision,
+    },
+    {
+      path: "/pages/reports",
+      name: "reports",
+      component: ReportCenter,
     }
   ],
 });
