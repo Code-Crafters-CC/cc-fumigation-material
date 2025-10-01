@@ -33,6 +33,7 @@ import MyFumigations from "../views/clientsModule/MyFumigations.vue";
 import Profile from "../views/clientsModule/Profile.vue";
 import RequestFumigation from "../views/clientsModule/RequestFumigation.vue";
 import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vue";
+import ReportCenter from "../views/ReportCenter.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -206,6 +207,9 @@ const router = createRouter({
       path: "/pages/client-my-fumigations",
       name: "client-my-fumigations",
       component: MyFumigations,
+      path: "/pages/reports",
+      name: "reports",
+      component: ReportCenter,
     }
   ],
 });

@@ -76,6 +76,13 @@ const isClient = computed(() => {
                         <li v-if="isAdmin">
                             <RouterLink class="dropdown-item" :to="{ name: 'price-calculator' }">Calculadora de Precios</RouterLink>
                         </li>
+                        <!-- Centro de Reportes SOLO para Administrador -->
+                        <li v-if="isAdmin">
+                            <RouterLink class="dropdown-item" :to="{ name: 'reports' }">
+                                <i class="fas fa-chart-bar me-1"></i>
+                                Centro de Reportes
+                            </RouterLink>
+                        </li>
                         <!-- Servicios para ambos -->
                         <li>
                             <RouterLink class="dropdown-item" :to="{ name: 'products' }">Control de Productos</RouterLink>
