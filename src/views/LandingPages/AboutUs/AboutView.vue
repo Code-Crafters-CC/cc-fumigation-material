@@ -1,11 +1,30 @@
 <script setup>
-import { onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import CustomNavbar from "../../../examples/navbars/CustomNavBar.vue";
 import DefaultFooter from "../../../examples/footers/FooterDefault.vue";
 import bg0 from "@/assets/img/vue-mk-header.jpg";
 import Typed from "typed.js";
 
 const body = document.getElementsByTagName("body")[0];
+const showRequestModal = ref(false);
+
+const openRequestModal = () => {
+  showRequestModal.value = true;
+};
+
+const closeRequestModal = () => {
+  showRequestModal.value = false;
+};
+
+const goToLogin = () => {
+  closeRequestModal();
+  window.location.href = "/login";
+};
+
+const goToRegister = () => {
+  closeRequestModal();
+  window.location.href = "/register";
+};
 
 onMounted(() => {
   body.classList.add("about-us");
@@ -91,17 +110,41 @@ onUnmounted(() => {
       </p>
       <div class="row justify-content-center mb-4">
         <div class="col-md-4 mb-3">
-          <img src="@/assets/img/fumigacion1.jpg" alt="Fumigación responsable" class="img-fluid rounded shadow" />
+          <img src="@/assets/img/fumigation1.jpg" alt="Fumigación responsable" class="img-fluid rounded shadow" />
         </div>
         <div class="col-md-4 mb-3">
-          <img src="@/assets/img/fumigacion2.jpg" alt="Prevención de plagas" class="img-fluid rounded shadow" />
+          <img src="@/assets/img/fumigation2.jpg" alt="Prevención de plagas" class="img-fluid rounded shadow" />
         </div>
       </div>
-      <a href="/solicitar-fumigacion" class="btn btn-success btn-lg mt-3">
+      <button class="btn btn-success btn-lg mt-3" @click="openRequestModal">
         SOLICITA TU FUMIGACIÓN
-      </a>
+      </button>
     </div>
   </section>
+
+  <!-- MODAL POPUP PARA SOLICITAR FUMIGACIÓN -->
+  <div v-if="showRequestModal" class="modal fade show d-block" tabindex="-1"
+    style="background:rgba(0,0,0,0.32);position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+      <div class="modal-content" style="border-radius:14px;">
+        <div class="modal-header" style="border-bottom:none;">
+          <h5 class="modal-title fw-bold" style="color:#198754;">¡Solicita tu fumigación!</h5>
+        </div>
+        <div class="modal-body pt-0">
+          <p class="mb-3" style="font-size:1.12rem;">
+            Para solicitar tu fumigación, primero debes iniciar sesión o registrarte.<br>
+            Así tendrás acceso a tu historial y seguimiento personalizado.
+          </p>
+        </div>
+        <div class="modal-footer d-flex justify-content-center gap-2" style="border-top:none;">
+          <RouterLink :to="{ name: 'signin-basic' }" class="btn btn-success px-4" @click="closeRequestModal">
+            Iniciar sesión
+          </RouterLink>
+          <button class="btn btn-secondary px-4" @click="closeRequestModal">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <DefaultFooter />
 </template>
 
@@ -109,16 +152,18 @@ onUnmounted(() => {
 .floating-cards-section {
   display: flex;
   justify-content: center;
-  margin-top: -4rem; 
+  margin-top: -4rem;
   margin-bottom: 2rem;
   z-index: 12;
   position: relative;
 }
+
 .floating-cards {
   display: flex;
   gap: 2rem;
   background: transparent;
 }
+
 .floating-card {
   background: #fff;
   border-radius: 20px;
@@ -131,16 +176,19 @@ onUnmounted(() => {
   transition: box-shadow 0.3s, transform 0.3s;
   font-size: 1.1rem;
 }
+
 .floating-card:hover {
   box-shadow: 0 16px 32px rgba(44, 62, 80, 0.16), 0 3px 8px rgba(44, 62, 80, 0.32);
   transform: translateY(-6px) scale(1.03);
 }
+
 @media (max-width: 1100px) {
   .floating-cards {
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
   }
+
   .floating-cards-section {
     margin-top: 1.5rem;
   }

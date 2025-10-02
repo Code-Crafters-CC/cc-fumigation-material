@@ -71,7 +71,7 @@ const salir = async () => {
                     </RouterLink>
                 </li>
                 <li class="nav-item" v-if="!isAuthenticated">
-                    <a class="nav-link" href="https://wa.me/502XXXXXXXX" target="_blank">Soporte</a>
+                    <a class="nav-link" href="https://wa.me/50212345678?text=Hola%20necesito%20soporte%20con%20la%20plataforma" target="_blank">Soporte</a>
                 </li>
 
                 <!-- Menú hamburguesa solo para Admin y Fumigador autenticados -->
