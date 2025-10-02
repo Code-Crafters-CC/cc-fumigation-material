@@ -84,8 +84,14 @@ if (type.value === "mobile") {
 }
 
 const salir = async () => {
-  appStore.salir();
-  router.push({ name: 'about'});
+  try {
+    await appStore.salir();
+    // La redirección ya se maneja en el store
+  } catch (error) {
+    console.error('Error durante logout:', error);
+    // Redirección de fallback
+    router.push({ name: 'about' });
+  }
 }
 
 watch(
@@ -148,16 +154,24 @@ watch(
           <span class="navbar-toggler-bar bar3"></span>
         </span>
       </button>
-          <MaterialButton
-            class="my-1 mb-2"
-            variant="contained"
-            color="white"
-            fullWidth
-            @click= "salir"
-            v-if="appStore.token"
-            >Logout</MaterialButton
-          >
+      
+      <div class="collapse navbar-collapse" id="navigation">
+        <ul class="navbar-nav navbar-nav-hover ms-auto">
+          <li class="nav-item" v-if="appStore.token">
+            <MaterialButton
+              class="btn btn-sm"
+              variant="outlined"
+              color="dark"
+              size="sm"
+              @click="salir"
+            >
+              <i class="fas fa-sign-out-alt me-1"></i>
+              Logout
+            </MaterialButton>
+          </li>
+        </ul>
       </div>
+    </div>
   </nav>
   <!-- End Navbar -->
 </template>

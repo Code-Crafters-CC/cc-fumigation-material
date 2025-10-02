@@ -1,8 +1,10 @@
 <script setup>
 import { computed } from 'vue';
 import { useAppStore } from '@/stores/index';
+import { useRouter } from 'vue-router';
 
 const store = useAppStore();
+const router = useRouter();
 
 const isAuthenticated = computed(() => store.isAuthenticated);
 
@@ -17,6 +19,17 @@ const isFumigator = computed(() => {
 const isClient = computed(() => {
     return store.isAuthenticated && store.rol && store.rol.toLowerCase() === 'cliente';
 });
+
+const salir = async () => {
+    try {
+        await store.salir();
+        // La redirección ya se maneja en el store
+    } catch (error) {
+        console.error('Error durante logout:', error);
+        // Redirección de fallback
+        router.push({ name: "about" });
+    }
+};
 </script>
 
 <template>
@@ -128,6 +141,18 @@ const isClient = computed(() => {
                         </li>
                     </ul>
                 </li>
+
+                <!-- Botón de Logout para usuarios autenticados -->
+                <li class="nav-item" v-if="isAuthenticated">
+                    <a 
+                        class="nav-link text-danger cursor-pointer d-flex align-items-center" 
+                        @click="salir"
+                        role="button"
+                    >
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Logout
+                    </a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -140,5 +165,15 @@ const isClient = computed(() => {
 
 .navbar .dropdown-menu {
     min-width: 200px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.nav-link.text-danger:hover {
+    color: #dc3545 !important;
+    text-decoration: none;
+    opacity: 0.8;
 }
 </style>
