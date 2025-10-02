@@ -112,7 +112,7 @@ export const useAppStore = defineStore("auth", {
       this.rol = null;
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(ROL_KEY);
-      router.push({ name: "login" });
+      router.push({ name: "about" });
     },
     checkTokenOrLogout() {
       const expired = isTokenExpired(this.token);
