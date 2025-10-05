@@ -19,8 +19,9 @@ import DefaultFooter from "@/examples/footers/FooterDefault.vue";
         <div class="container my-8 mt-8">
             <h2 class="text-success mb-6">Misión</h2>
             <p>
-                Brindar soluciones innovadoras y eficientes en el control de plagas, garantizando la seguridad, salud y
-                bienestar de nuestros clientes, mediante el uso responsable de productos y tecnología de vanguardia.
+                Brindar servicios de fumigación y control de plagas de manera segura, efectiva y responsable,
+                protegiendo la salud de las familias, los cultivos y el medio ambiente, garantizando la tranquilidad y
+                satisfacción de nuestros clientes.
             </p>
         </div>
     </section>

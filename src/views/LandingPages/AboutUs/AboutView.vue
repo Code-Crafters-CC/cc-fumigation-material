@@ -109,11 +109,11 @@ onUnmounted(() => {
         Ofrecemos métodos efectivos, productos responsables y asesoría en el cuidado preventivo de plagas.
       </p>
       <div class="row justify-content-center mb-4">
-        <div class="col-md-4 mb-3">
-          <img src="@/assets/img/fumigation1.jpg" alt="Fumigación responsable" class="img-fluid rounded shadow" />
+        <div class="col-md-4 mb-3 d-flex justify-content-center">
+          <img src="@/assets/img/fumigation1.jpg" alt="Fumigación responsable" class="servicio-img" />
         </div>
-        <div class="col-md-4 mb-3">
-          <img src="@/assets/img/fumigation2.jpg" alt="Prevención de plagas" class="img-fluid rounded shadow" />
+        <div class="col-md-4 mb-3 d-flex justify-content-center">
+          <img src="@/assets/img/fumigation2.jpg" alt="Prevención de plagas" class="servicio-img" />
         </div>
       </div>
       <button class="btn btn-success btn-lg mt-3" @click="openRequestModal">
@@ -191,6 +191,22 @@ onUnmounted(() => {
 
   .floating-cards-section {
     margin-top: 1.5rem;
+  }
+}
+
+.servicio-img {
+  width: 340px;
+  height: 340px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.09);
+}
+
+@media (max-width: 900px) {
+  .servicio-img {
+    width: 95vw;
+    max-width: 340px;
+    height: 220px;
   }
 }
 </style>

@@ -37,7 +37,7 @@ const salir = async () => {
         <div class="d-flex align-items-center">
             <a class="navbar-brand d-flex align-items-center" href="/">
                 <img src="@/assets/img/logo.png" alt="Logo" height="40" />
-                <span class="ms-2 h4 mb-0 fw-bold text-success system-name">Fumigations System</span>
+                <span class="ms-2 h4 mb-0 fw-bold text-success system-name">Fumigaciones Oliva Gómez</span>
             </a>
         </div>
         <div class="collapse navbar-collapse justify-content-end">
@@ -49,7 +49,7 @@ const salir = async () => {
                     <ul class="dropdown-menu">
                         <li>
                             <RouterLink class="dropdown-item" :to="{ name: 'about-fumigation-system' }">
-                                ¿Qué es Fumigations System?
+                                ¿Qué es Fumigaciones Oliva Gómez?
                             </RouterLink>
                         </li>
                         <li>
@@ -70,8 +70,40 @@ const salir = async () => {
                         Login
                     </RouterLink>
                 </li>
-                <li class="nav-item" v-if="!isAuthenticated">
-                    <a class="nav-link" href="https://wa.me/50212345678?text=Hola%20necesito%20soporte%20con%20la%20plataforma" target="_blank">Soporte</a>
+                <li class="nav-item dropdown" v-if="!isAuthenticated">
+                    <a class="nav-link dropdown-toggle" href="#" id="soporteDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Soporte
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="soporteDropdown">
+                        <li>
+                            <a class="dropdown-item"
+                                href="https://wa.me/50232465366?text=Hola%20necesito%20atenci%C3%B3n%20al%20cliente%20con%20la%20plataforma"
+                                target="_blank">
+                                Atención al cliente
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                                href="https://wa.me/50255682428?text=Hola%20necesito%20soporte%20t%C3%A9cnico%20con%20la%20plataforma"
+                                target="_blank">
+                                Soporte técnico
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        Nuestros Servicios
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <RouterLink class="dropdown-item" :to="{ name: 'services' }">
+                                Servicios generales
+                            </RouterLink>
+                        </li>
+                        <!-- puedes agregar más servicios específicos aquí si lo deseas -->
+                    </ul>
                 </li>
 
                 <!-- Menú hamburguesa solo para Admin y Fumigador autenticados -->
@@ -87,7 +119,8 @@ const salir = async () => {
                         </li>
                         <!-- Calculadora de Precios SOLO para Administrador -->
                         <li v-if="isAdmin">
-                            <RouterLink class="dropdown-item" :to="{ name: 'price-calculator' }">Calculadora de Precios</RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'price-calculator' }">Calculadora de Precios
+                            </RouterLink>
                         </li>
                         <!-- Centro de Reportes SOLO para Administrador -->
                         <li v-if="isAdmin">
@@ -98,7 +131,8 @@ const salir = async () => {
                         </li>
                         <!-- Servicios para ambos -->
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'products' }">Control de Productos</RouterLink>
+                            <RouterLink class="dropdown-item" :to="{ name: 'products' }">Control de Productos
+                            </RouterLink>
                         </li>
                         <li>
                             <RouterLink class="dropdown-item" :to="{ name: 'plagues' }">Registro de Plagas</RouterLink>
@@ -108,11 +142,13 @@ const salir = async () => {
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones y consumo
+                            <RouterLink class="dropdown-item" :to="{ name: 'contactus' }">Historial de fumigaciones y
+                                consumo
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink class="dropdown-item" :to="{ name: 'fumigation-calendar' }">Calendario de Fumigaciones
+                            <RouterLink class="dropdown-item" :to="{ name: 'fumigation-calendar' }">Calendario de
+                                Fumigaciones
                             </RouterLink>
                         </li>
                     </ul>
@@ -144,11 +180,8 @@ const salir = async () => {
 
                 <!-- Botón de Logout para usuarios autenticados -->
                 <li class="nav-item" v-if="isAuthenticated">
-                    <a 
-                        class="nav-link text-danger cursor-pointer d-flex align-items-center" 
-                        @click="salir"
-                        role="button"
-                    >
+                    <a class="nav-link text-danger cursor-pointer d-flex align-items-center" @click="salir"
+                        role="button">
                         <i class="fas fa-sign-out-alt me-2"></i>
                         Logout
                     </a>
@@ -175,5 +208,11 @@ const salir = async () => {
     color: #dc3545 !important;
     text-decoration: none;
     opacity: 0.8;
+}
+
+.navbar .dropdown-menu {
+    min-width: 200px;
+    right: 0 !important;
+    left: auto !important;
 }
 </style>

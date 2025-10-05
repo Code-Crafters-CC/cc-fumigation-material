@@ -35,6 +35,7 @@ import RequestFumigation from "../views/clientsModule/RequestFumigation.vue";
 import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vue";
 import ReportCenter from "../views/ReportCenter.vue";
 import FumigationCalendar from "../views/LandingPages/components/FumigationCalendar.vue";
+import Services from "../views/Services.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -219,6 +220,11 @@ const router = createRouter({
       name: "fumigation-calendar",
       component: FumigationCalendar,
     },
+    {
+      path: "/pages/services",
+      name: "services",
+      component: Services,
+    }
   ],
 });
 

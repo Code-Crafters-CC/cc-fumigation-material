@@ -20,9 +20,8 @@ import DefaultFooter from "@/examples/footers/FooterDefault.vue";
         <div class="container my-8 mt-8">
             <h2 class="text-success mb-6">Visión</h2>
             <p>
-                Ser la plataforma líder en gestión de fumigaciones, reconocida por su excelencia, innovación y
-                compromiso
-                con el medio ambiente y la satisfacción del cliente.
+                Ser la empresa líder en control de plagas en el occidente de Guatemala, reconocida por su compromiso con
+                la calidad, la innovación en sus servicios y el respeto por el entorno natural.
             </p>
         </div>
     </section>
