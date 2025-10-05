@@ -84,8 +84,14 @@ if (type.value === "mobile") {
 }
 
 const salir = async () => {
-  appStore.salir();
-  router.push({ name: 'about'});
+  try {
+    await appStore.salir();
+    // La redirección ya se maneja en el store
+  } catch (error) {
+    console.error('Error durante logout:', error);
+    // Redirección de fallback
+    router.push({ name: 'about' });
+  }
 }
 
 watch(
@@ -131,7 +137,7 @@ watch(
         rel="tooltip"
         data-placement="bottom"
       >
-        FUMIGACIONES
+        HOME
       </RouterLink>
       <button
         class="navbar-toggler shadow-none ms-2"
@@ -148,126 +154,21 @@ watch(
           <span class="navbar-toggler-bar bar3"></span>
         </span>
       </button>
-      <div
-        class="collapse navbar-collapse w-100 pt-3 pb-2 py-lg-0"
-        id="navigation"
-      >
+      
+      <div class="collapse navbar-collapse" id="navigation">
         <ul class="navbar-nav navbar-nav-hover ms-auto">
-          <li class="nav-item dropdown dropdown-hover mx-2">
-            <a
-              role="button"
-              class="nav-link ps-2 d-flex cursor-pointer align-items-center"
-              :class="getTextColor()"
-              id="dropdownMenuPages"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
+          <li class="nav-item" v-if="appStore.token">
+            <MaterialButton
+              class="btn btn-sm"
+              variant="outlined"
+              color="dark"
+              size="sm"
+              @click="salir"
             >
-              <i
-                class="material-icons opacity-6 me-2 text-md"
-                :class="getTextColor()"
-                >dashboard</i
-              >
-              Secciones
-              <img
-                :src="getArrowColor()"
-                alt="down-arrow"
-                class="arrow ms-2 d-lg-block d-none"
-              />
-              <img
-                :src="getArrowColor()"
-                alt="down-arrow"
-                class="arrow ms-1 d-lg-none d-block ms-auto"
-              />
-            </a>
-            <div
-              class="dropdown-menu dropdown-menu-animation ms-n3 dropdown-md p-3 border-radius-xl mt-0 mt-lg-3"
-              aria-labelledby="dropdownMenuPages"
-            >
-              <div class="row d-none d-lg-block">
-                <div class="col-12 px-4 py-2">
-                  <div class="row">
-                    <div class="position-relative">
-                      <!-- Home -->
-                      <RouterLink
-                        :to="{ name: 'about' }"
-                        class="dropdown-item border-radius-md"
-                      >
-                        <span>Home</span>
-                      </RouterLink>
-
-                      <!-- Historial -->
-                      <RouterLink
-                        :to="{ name: 'contactus' }"
-                        class="dropdown-item border-radius-md"
-                        v-if="appStore.token"
-                      >
-                      <span>Historial</span>
-                      </RouterLink>
-
-                      <!-- Fumigaciones -->
-                      <RouterLink
-                        :to="{ name: 'controlForm' }"
-                        class="dropdown-item border-radius-md"
-                        v-if="appStore.token"
-                        >
-                        <span>Fumigaciones</span>
-                      </RouterLink>
-
-                      <!-- Usuarios -->
-                      <RouterLink
-                        :to="{ name: 'users' }"
-                        class="dropdown-item border-radius-md"
-                        v-if="appStore.token"
-                      >
-                        <span>Usuarios</span>
-                      </RouterLink>
-
-                      <!-- Productos -->
-                      <RouterLink
-                        :to="{ name: 'products' }"
-                        class="dropdown-item border-radius-md"
-                        v-if="appStore.token"
-                      >
-                        <span>Productos</span>
-                      </RouterLink>
-
-                      <!-- Plagas -->
-                      <RouterLink
-                        :to="{ name: 'plagues' }"
-                        class="dropdown-item border-radius-md"
-                        v-if="appStore.token"
-                      >
-                        <span>Plagas</span>
-                      </RouterLink>
-
-                      <!-- Divisor -->
-                      <div
-                        class="dropdown-header text-dark font-weight-bolder d-flex align-items-center px-0 mt-3"
-                      >
-                        Cuenta
-                      </div>
-                      <!-- Login -->
-                      <RouterLink
-                        :to="{ name: 'signin-basic' }"
-                        class="dropdown-item border-radius-md"
-                      >
-                        <span>Login</span>
-                      </RouterLink>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              <i class="fas fa-sign-out-alt me-1"></i>
+              Logout
+            </MaterialButton>
           </li>
-          <MaterialButton
-            class="my-1 mb-2"
-            variant="contained"
-            color="white"
-            fullWidth
-            @click= "salir"
-            v-if="appStore.token"
-            >Logout</MaterialButton
-          >
         </ul>
       </div>
     </div>

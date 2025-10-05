@@ -26,6 +26,16 @@ import ControlForm from "../views/LandingPages/components/ControlForm.vue";
 import ShowUsers from '../views/LandingPages/components/ShowUsers.vue';
 import Products from "../views/LandingPages/components/Products.vue";
 import Plagues from "../views/LandingPages/components/Plagues.vue";
+import AboutFumigationSystem from "../views/LandingPages/components/AboutFumigationSystem.vue"; 
+import Mission from "../views/LandingPages/components/Mission.vue";
+import Vision from "../views/LandingPages/components/Vision.vue";
+import MyFumigations from "../views/clientsModule/MyFumigations.vue";
+import Profile from "../views/clientsModule/Profile.vue";
+import RequestFumigation from "../views/clientsModule/RequestFumigation.vue";
+import PriceCalculator from "../views/LandingPages/components/PriceCalculator.vue";
+import ReportCenter from "../views/ReportCenter.vue";
+import FumigationCalendar from "../views/LandingPages/components/FumigationCalendar.vue";
+import Services from "../views/Services.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +79,11 @@ const router = createRouter({
       path: "/pages/plagues",
       name: "plagues",
       component: Plagues,
+    },
+    {
+      path: "/pages/price-calculator",
+      name: "price-calculator",
+      component: PriceCalculator,
     },
     {
       path: "/sections/page-sections/page-headers",
@@ -165,6 +180,51 @@ const router = createRouter({
       name: "el-typography",
       component: ElTypography,
     },
+    {
+      path: "/pages/about-fumigation-system",
+      name: "about-fumigation-system",
+      component: AboutFumigationSystem,
+    },
+    {
+      path: "/pages/mission",
+      name: "mission",
+      component: Mission,
+    },
+    {
+      path: "/pages/vision",
+      name: "vision",
+      component: Vision,
+    },
+    {
+      path: "/pages/client-profile",
+      name: "client-profile",
+      component: Profile,
+    },
+    {
+      path: "/pages/client-request-fumigation",
+      name: "client-request-fumigation",
+      component: RequestFumigation,
+    },
+    {
+      path: "/pages/client-my-fumigations",
+      name: "client-my-fumigations",
+      component: MyFumigations,
+    },
+    {
+      path: "/pages/reports",
+      name: "reports",
+      component: ReportCenter,
+    },
+    {
+      path: "/pages/fumigation-calendar",
+      name: "fumigation-calendar",
+      component: FumigationCalendar,
+    },
+    {
+      path: "/pages/services",
+      name: "services",
+      component: Services,
+    }
   ],
 });
 
