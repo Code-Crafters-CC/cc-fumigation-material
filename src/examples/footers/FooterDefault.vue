@@ -25,7 +25,7 @@ defineProps({
               {{ new Date().getFullYear() }}
               Fumigaciones Oliva Gómez  developed by
               <a href="https://www.facebook.com/christian.requena.79" target="_blank"
-                >Cristian Requena</a
+                >Christian Requena</a
               >.
             </p>
           </div>
