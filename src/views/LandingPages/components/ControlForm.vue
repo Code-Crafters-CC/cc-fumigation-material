@@ -32,6 +32,7 @@ const editingId = ref(null);
 const editingStatus = ref("");
 const editingProductUsed = ref(""); // Cantidad utilizada
 const editingProductId = ref(""); // Producto sugerido (id)
+const editingNotes = ref("");
 
 const fetchStatusOptions = async () => {
   try {
@@ -71,9 +72,10 @@ const listarProductos = async () => {
 
 const startEdit = (fumigation) => {
   editingId.value = fumigation.id;
-  editingStatus.value = fumigation.status; // status es el ID
-  editingProductUsed.value = fumigation.product_used || ""; // cantidad utilizada
+  editingStatus.value = fumigation.status;
+  editingProductUsed.value = fumigation.product_used || "";
   editingProductId.value = fumigation.product_suggested?.id || "";
+  editingNotes.value = fumigation.notes || ""; 
 };
 
 const cancelEdit = () => {
@@ -81,6 +83,7 @@ const cancelEdit = () => {
   editingStatus.value = "";
   editingProductUsed.value = "";
   editingProductId.value = "";
+  editingNotes.value = ""; 
 };
 
 const saveEdit = async (fumigationId) => {
@@ -88,6 +91,7 @@ const saveEdit = async (fumigationId) => {
     let payload = {
       status: editingStatus.value,
       product_suggested: editingProductId.value || null,
+      notes: editingNotes.value || ""
     };
     // Solo enviar cantidad utilizada si status es COMPLETED
     const statusObj = statusOptions.value.find(s => s.value === editingStatus.value);
@@ -164,6 +168,7 @@ onMounted(async () => {
                         <th>Tipo de producto</th>
                         <th>Cantidad utilizada</th>
                         <th>Status</th>
+                        <th>Notas</th>
                         <th>Acciones</th>
                       </tr>
                     </thead>
@@ -223,6 +228,16 @@ onMounted(async () => {
                           </template>
                           <template v-else>
                             {{ statusTranslation[lf.status_name] || lf.status_name }}
+                          </template>
+                        </td>
+                        <!-- Campo Notas -->
+                        <td>
+                          <template v-if="editingId === lf.id">
+                            <textarea v-model="editingNotes" class="form-control form-control-sm" rows="2"
+                              style="min-width: 120px; max-width:180px;" placeholder="Notas..."></textarea>
+                          </template>
+                          <template v-else>
+                            {{ lf.notes || "-" }}
                           </template>
                         </td>
 
