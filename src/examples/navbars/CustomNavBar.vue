@@ -40,8 +40,8 @@ const salir = async () => {
                 <span class="ms-2 h4 mb-0 fw-bold text-success system-name">Fumigaciones Oliva Gómez</span>
             </a>
         </div>
-        <div class="collapse navbar-collapse justify-content-end">
-            <ul class="navbar-nav align-items-center">
+        <div class="navbar-collapse justify-content-end always-show">
+            <ul class="navbar-nav align-items-center flex-wrap">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         ¿Quiénes Somos?
@@ -214,5 +214,93 @@ const salir = async () => {
     min-width: 200px;
     right: 0 !important;
     left: auto !important;
+}
+
+/* Hacer que el navbar siempre se muestre */
+.always-show {
+    display: flex !important;
+    flex-basis: auto;
+}
+
+/* Responsive: en pantallas pequeñas, ajustar el diseño */
+@media (max-width: 991px) {
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .navbar-nav .nav-item {
+        margin: 0.25rem 0;
+    }
+    
+    .navbar-nav .dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+        background-color: #f8f9fa;
+        margin-top: 0.5rem;
+    }
+    
+    .system-name {
+        font-size: 1rem !important;
+        letter-spacing: 1px;
+    }
+    
+    .navbar-brand img {
+        height: 35px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+    
+    .navbar-nav {
+        margin-top: 0.5rem;
+    }
+    
+    .navbar-nav .nav-item {
+        margin: 0.15rem 0;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .system-name {
+        font-size: 0.9rem !important;
+        letter-spacing: 0.5px;
+    }
+    
+    .navbar-brand img {
+        height: 30px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .d-flex.align-items-center {
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .navbar-nav {
+        margin-top: 0;
+    }
+    
+    .system-name {
+        font-size: 0.8rem !important;
+        text-align: center;
+    }
 }
 </style>

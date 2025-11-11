@@ -4,7 +4,6 @@ import axios from "axios";
 import { useAppStore } from "@/stores";
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import DefaultFooter from "@/examples/footers/FooterDefault.vue";
-import image from "@/assets/img/illustration-signin.jpg";
 
 const store = useAppStore();
 const listFumigations = ref([]);

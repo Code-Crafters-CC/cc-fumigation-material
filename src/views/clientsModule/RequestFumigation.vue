@@ -6,7 +6,6 @@ import MaterialButton from "@/components/MaterialButton.vue";
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import DefaultFooter from "@/examples/footers/FooterDefault.vue";
 import setMaterialInput from "@/assets/js/material-input";
-import image from "@/assets/img/illustration-signin.jpg";
 
 const store = useAppStore();
 const requested_date = ref("");

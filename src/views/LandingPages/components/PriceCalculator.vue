@@ -14,6 +14,7 @@ import setMaterialInput from "@/assets/js/material-input";
 const products = ref([]);
 const selectedProducts = ref({});
 const loading = ref(false);
+const manualLaborCost = ref(0);
 
 // Método para obtener productos
 const fetchProducts = async () => {
@@ -48,9 +49,9 @@ const subtotal = computed(() => {
   }, 0);
 });
 
-// Calcular mano de obra (15%)
+// Mano de obra manual
 const laborCost = computed(() => {
-  return subtotal.value * 0.15;
+  return parseFloat(manualLaborCost.value) || 0;
 });
 
 // Total final
@@ -73,6 +74,17 @@ const selectedProductsDetails = computed(() => {
 // Limpiar selección
 const clearSelection = () => {
   selectedProducts.value = {};
+  manualLaborCost.value = 0;
+};
+
+// Función para imprimir cotización
+const printQuotation = () => {
+  try {
+    window.print();
+  } catch (error) {
+    console.error("Error al imprimir:", error);
+    alert("No se pudo imprimir la cotización. Por favor, use Ctrl+P para imprimir manualmente.");
+  }
 };
 
 onMounted(() => {
@@ -221,11 +233,29 @@ onMounted(() => {
                             <span>Subtotal Productos:</span>
                             <span class="font-weight-bold">Q{{ subtotal.toFixed(2) }}</span>
                           </div>
+                          
+                          <!-- Campo para mano de obra manual -->
+                          <div class="mb-3">
+                            <label class="form-label text-sm font-weight-bold">
+                              Mano de Obra (Manual):
+                            </label>
+                            <div class="input-group input-group-outline">
+                              <input
+                                v-model="manualLaborCost"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="form-control"
+                                placeholder="Ingrese costo de mano de obra"
+                              />
+                              <span class="input-group-text">Q</span>
+                            </div>
+                          </div>
                           <div class="d-flex justify-content-between mb-2">
-                            <span>Mano de Obra (15%):</span>
+                            <span>Mano de Obra:</span>
                             <span class="font-weight-bold">Q{{ laborCost.toFixed(2) }}</span>
                           </div>
-                          <hr>
+                          <hr />
                           <div class="d-flex justify-content-between">
                             <span class="font-weight-bold text-lg">Total:</span>
                             <span class="font-weight-bold text-lg text-success">
@@ -245,7 +275,7 @@ onMounted(() => {
                           </MaterialButton>
                           <MaterialButton
                             class="btn bg-gradient-info"
-                            @click="window.print()"
+                            @click="printQuotation"
                           >
                             <i class="fas fa-print me-1"></i>
                             Imprimir Cotización
@@ -277,6 +307,27 @@ onMounted(() => {
   font-size: 0.75rem;
 }
 
+.input-group-outline {
+  border: 1px solid #d2d6da;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.input-group-outline .form-control {
+  border: none;
+  box-shadow: none;
+}
+
+.input-group-outline .form-control:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.input-group-outline:focus-within {
+  border-color: #e91e63;
+  box-shadow: 0 0 0 0.2rem rgba(233, 30, 99, 0.25);
+}
+
 @media print {
   .btn {
     display: none !important;
@@ -285,6 +336,10 @@ onMounted(() => {
   .card {
     box-shadow: none !important;
     border: 1px solid #dee2e6 !important;
+  }
+  
+  .input-group-outline {
+    border: 1px solid #000 !important;
   }
 }
 </style>
