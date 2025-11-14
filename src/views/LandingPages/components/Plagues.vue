@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import axios from "axios";
 import { useAppStore } from '@/stores/index';
 // Components
@@ -11,6 +11,8 @@ import image from "@/assets/img/illustrations/illustration-signin.jpg";
 
 const store = useAppStore();
 const listPlagues = ref([]);
+const isLoading = ref(false);
+const isSubmitting = ref(false);
 const fieldsPlagues = ref([
   "id",
   "plague_name",
@@ -39,52 +41,127 @@ const clear = () => {
 
 const createOrUpdatePlague = async () => {
   try {
+    // Validar datos de entrada
+    if (!plagueName.value.trim()) {
+      alert("Por favor ingresa el nombre de la plaga");
+      return;
+    }
+    if (!plagueType.value) {
+      alert("Por favor selecciona un tipo de plaga");
+      return;
+    }
+    
+    isSubmitting.value = true;
+    
+    // Verificar token
+    const token = store.token?.access || store.token;
+    console.log("Token a usar:", token ? "Token disponible" : "Token no encontrado");
+    
+    if (!token) {
+      alert("No hay token de autenticación disponible");
+      return;
+    }
+
     const payload = {
       plague_name: plagueName.value,
       plague_type: plagueType.value,
       description: description.value,
-      recommended_products: recommendedProducts.value,
+      recommended_products: recommendedProducts.value
     };
+
+    console.log("Payload a enviar:", payload);
+
+    let response;
     if (editingId.value) {
-      // PATCH
-      await axios.patch(
-        `plague/${editingId.value}/`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${store.token.access}`,
-          }
-        }
-      );
+      response = await axios.patch(`plague/${editingId.value}/`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Plaga actualizada:", response.data);
+      alert("Plaga actualizada correctamente");
     } else {
-      // POST
-      await axios.post(
-        "plague/",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${store.token.access}`,
-          }
-        }
-      );
+      response = await axios.post("plague/", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Nueva plaga creada:", response.data);
+      alert("Plaga creada correctamente");
     }
+
+    // Limpiar formulario
+    plagueName.value = "";
+    plagueType.value = "";
+    description.value = "";
+    recommendedProducts.value = [];
+    editingId.value = null;
+
+    // Actualizar la lista inmediatamente
+    console.log("Actualizando lista de plagas...");
+    
+    // Pequeño delay para asegurar que el servidor haya procesado completamente
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Forzar actualización de la lista
     await listPlague();
-    clear();
+    
+    // Verificar si la lista se actualizó
+    console.log("Lista actualizada. Total de plagas:", listPlagues.value.length);
+    
   } catch (error) {
-    console.log(error);
+    console.error("Error completo:", error);
+    console.error("Error response:", error.response);
+    console.error("Error message:", error.message);
+    
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      alert(`Error del servidor: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+      alert("Error de conexión: No se pudo conectar con el servidor");
+    } else {
+      console.error("Error setting up request:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
 const listPlague = async () => {
   try {
+    isLoading.value = true;
+    
+    // Obtener el token correctamente
+    const token = store.token?.access || store.token;
+    if (!token) {
+      console.error("No hay token de autenticación disponible para listar plagas");
+      return;
+    }
+
+    console.log("Cargando lista de plagas...");
     const response = await axios.get("plague/", {
       headers: {
-        Authorization: `Bearer ${store.token.access}`,
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
+    
+    // Forzar reactividad limpiando primero
+    listPlagues.value = [];
+    await nextTick();
     listPlagues.value = response.data;
+    
+    console.log("Lista de plagas actualizada:", response.data.length, "elementos");
+    
   } catch (error) {
-    console.log(error);
+    console.error("Error al cargar plagas:", error);
+    if (error.response) {
+      console.error("Respuesta del servidor:", error.response.data);
+    }
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -261,8 +338,15 @@ onMounted(() => {
                               color="success"
                               fullWidth
                               type="submit"
+                              :disabled="isSubmitting"
                             >
-                              {{ editingId ? "Actualizar" : "Registrar" }}
+                              <span v-if="isSubmitting">
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                Procesando...
+                              </span>
+                              <span v-else>
+                                {{ editingId ? "Actualizar" : "Registrar" }}
+                              </span>
                             </MaterialButton>
                             <MaterialButton v-if="editingId" class="my-4 mb-2" variant="outlined" color="dark" fullWidth
                               @click="clear">
@@ -303,7 +387,14 @@ onMounted(() => {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="(lP, i) in listPlagues" :key="lP.id">
+                          <tr v-if="isLoading">
+                            <td colspan="6" class="text-center">
+                              <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr v-for="lP in listPlagues" :key="lP.id" v-else>
                             <td>{{ lP.id }}</td>
                             <td>{{ lP.plague_name }}</td>
                             <td>{{ lP.description }}</td>

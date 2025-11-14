@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import axios from "axios";
 import { useAppStore } from '@/stores/index';
 
@@ -10,6 +10,8 @@ import setMaterialInput from "@/assets/js/material-input";
 import image from "@/assets/img/illustrations/illustration-signin.jpg";
 
 const listProducts = ref([]);
+const isLoading = ref(false);
+const isSubmitting = ref(false);
 const fields = ref([
   "id", "product_name", "stock", "price", "product_type", "provider"
 ]);
@@ -36,6 +38,35 @@ const clean = async () => {
 
 const createOrUpdateProduct = async () => {
   try {
+    // Validar datos de entrada
+    if (!product_name.value.trim()) {
+      alert("Por favor ingresa el nombre del producto");
+      return;
+    }
+    if (!stock.value || stock.value < 0) {
+      alert("Por favor ingresa un stock válido");
+      return;
+    }
+    if (!price.value || price.value <= 0) {
+      alert("Por favor ingresa un precio válido");
+      return;
+    }
+    if (!product_type.value) {
+      alert("Por favor selecciona un tipo de producto");
+      return;
+    }
+    
+    isSubmitting.value = true;
+    
+    // Verificar token
+    const token = store.token?.access || store.token;
+    console.log("Token a usar:", token ? "Token disponible" : "Token no encontrado");
+    
+    if (!token) {
+      alert("No hay token de autenticación disponible");
+      return;
+    }
+
     const payload = {
       product_name: product_name.value,
       stock: stock.value,
@@ -43,46 +74,99 @@ const createOrUpdateProduct = async () => {
       product_type: product_type.value,
       provider: provider.value,
     };
+
+    console.log("Payload a enviar:", payload);
+
+    let response;
     if (editingId.value) {
-      // PATCH
-      await axios.patch(
-        `product/${editingId.value}/`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${store.token.access}`,
-          },
-        }
-      );
+      response = await axios.patch(`product/${editingId.value}/`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Producto actualizado:", response.data);
+      alert("Producto actualizado correctamente");
     } else {
-      // POST
-      await axios.post(
-        "product/",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${store.token.access}`,
-          },
-        }
-      );
+      response = await axios.post("product/", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Nuevo producto creado:", response.data);
+      alert("Producto creado correctamente");
     }
-    await listarProductos();
+
+    // Limpiar formulario
     clean();
+
+    // Actualizar la lista inmediatamente
+    console.log("Actualizando lista de productos...");
+    
+    // Pequeño delay para asegurar que el servidor haya procesado completamente
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    
+    // Forzar actualización de la lista
+    await listarProductos();
+    
+    // Verificar si la lista se actualizó
+    console.log("Lista actualizada. Total de productos:", listProducts.value.length);
+    
   } catch (error) {
-    console.log(error);
+    console.error("Error completo:", error);
+    console.error("Error response:", error.response);
+    console.error("Error message:", error.message);
+    
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      alert(`Error del servidor: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+      alert("Error de conexión: No se pudo conectar con el servidor");
+    } else {
+      console.error("Error setting up request:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
 const listarProductos = async () => {
   try {
+    isLoading.value = true;
+    
+    // Verificar token
+    const token = store.token?.access || store.token;
+    console.log("Token para listar productos:", token ? "Disponible" : "No disponible");
+    
+    if (!token) {
+      console.error("No hay token de autenticación disponible para listar productos");
+      return;
+    }
+
+    console.log("Cargando lista de productos...");
+    
     const response = await axios.get("product/", {
       headers: {
-        Authorization: `Bearer ${store.token.access}`,
+        Authorization: `Bearer ${token}`,
       },
     });
+    
+    // Forzar reactividad limpiando primero
+    listProducts.value = [];
+    await nextTick();
     listProducts.value = response.data;
+    
+    console.log("Lista de productos actualizada:", response.data.length, "elementos");
+    
   } catch (error) {
-    console.log(error);
+    console.error("Error al cargar productos:", error);
+    if (error.response) {
+      console.error("Respuesta del servidor:", error.response.data);
+    }
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -110,16 +194,50 @@ const editProduct = (product) => {
 
 const deleteProduct = async (id) => {
   if (!confirm("¿Seguro que deseas eliminar este producto?")) return;
+  
   try {
+    console.log("Eliminando producto con ID:", id);
+    
+    // Verificar token
+    const token = store.token?.access || store.token;
+    if (!token) {
+      alert("No hay token de autenticación disponible");
+      return;
+    }
+
     await axios.delete(`product/${id}/`, {
       headers: {
-        Authorization: `Bearer ${store.token.access}`,
+        Authorization: `Bearer ${token}`,
       },
     });
+    
+    console.log("Producto eliminado correctamente");
+    alert("Producto eliminado correctamente");
+    
+    // Actualizar la lista inmediatamente
+    console.log("Actualizando lista después de eliminación...");
     await listarProductos();
-    if (editingId.value === id) clean();
+    
+    // Limpiar formulario si estaba editando este producto
+    if (editingId.value === id) {
+      clean();
+    }
+    
   } catch (error) {
-    console.log(error);
+    console.error("Error al eliminar producto:", error);
+    console.error("Error response:", error.response);
+    
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      alert(`Error del servidor: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+      alert("Error de conexión: No se pudo conectar con el servidor");
+    } else {
+      console.error("Error setting up request:", error.message);
+      alert(`Error: ${error.message}`);
+    }
   }
 };
 
@@ -195,9 +313,20 @@ onMounted(() => {
                               </option>
                             </select>
                             <div class="text-center">
-                              <MaterialButton class="my-4 mb-2" variant="gradient" color="success" fullWidth
-                                type="submit">
-                                {{ editingId ? "Actualizar" : "Registrar" }}
+                              <MaterialButton 
+                                class="my-4 mb-2" 
+                                variant="gradient" 
+                                color="success" 
+                                fullWidth
+                                type="submit"
+                                :disabled="isSubmitting">
+                                <span v-if="isSubmitting">
+                                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                  Procesando...
+                                </span>
+                                <span v-else>
+                                  {{ editingId ? "Actualizar" : "Registrar" }}
+                                </span>
                               </MaterialButton>
                               <MaterialButton v-if="editingId" class="my-4 mb-2" variant="outlined" color="dark" fullWidth
                                 @click="clean">
@@ -237,7 +366,14 @@ onMounted(() => {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="(lp, i) in listProducts" :key="lp.id">
+                          <tr v-if="isLoading">
+                            <td colspan="8" class="text-center">
+                              <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr v-for="lp in listProducts" :key="lp.id" v-else>
                             <td>{{ lp.id }}</td>
                             <td>{{ lp.product_name }}</td>
                             <td>{{ lp.product_type["product_type_name"] }}</td>
