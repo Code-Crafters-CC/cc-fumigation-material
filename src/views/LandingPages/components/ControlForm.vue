@@ -23,9 +23,13 @@ const listProducts = ref([]);
 
 const statusTranslation = {
   "REQUESTED": "Solicitado",
+  "SCHEDULED": "Programado",
   "IN_PROGRESS": "En progreso",
   "COMPLETED": "Completado",
-  "CANCELLED": "Cancelado"
+  "CANCELLED": "Cancelado",
+  "PENDING": "Pendiente",
+  "APPROVED": "Aprobado",
+  "REJECTED": "Rechazado"
 };
 
 const editingId = ref(null);
@@ -36,13 +40,15 @@ const editingNotes = ref("");
 
 const fetchStatusOptions = async () => {
   try {
-    const res = await axios.get("/status/", {
-      headers: { Authorization: `Bearer ${store.token.access}` }
+    const res = await axios.get("status/", {
+      headers: { Authorization: `Bearer ${store.token.access}` },
     });
-    statusOptions.value = res.data.map(s => ({
-      value: s.id,
-      label: statusTranslation[s.status_name] || s.status_name
+    statusOptions.value = res.data.map((s) => ({
+      value: s.id, // Usar el ID para enviar al servidor
+      label: statusTranslation[s.status_name] || s.status_name, // Mostrar traducción
+      statusName: s.status_name, // Mantener status_name para verificaciones lógicas
     }));
+    console.log("Estados cargados:", statusOptions.value);
   } catch (error) {
     console.log("Error cargando status:", error);
   }
@@ -72,13 +78,14 @@ const listarProductos = async () => {
 
 const startEdit = (fumigation) => {
   editingId.value = fumigation.id;
-  editingStatus.value = fumigation.status;
+  editingStatus.value = fumigation.status; // Usar el ID del status
   editingProductUsed.value = fumigation.product_used || "";
   editingProductId.value = fumigation.product_suggested?.id || "";
-  editingNotes.value = fumigation.notes || ""; 
-};
-
-const cancelEdit = () => {
+  editingNotes.value = fumigation.notes || "";
+  console.log("Editando fumigación:", fumigation);
+  console.log("Status ID:", fumigation.status);
+  console.log("Status name:", fumigation.status_name);
+};const cancelEdit = () => {
   editingId.value = null;
   editingStatus.value = "";
   editingProductUsed.value = "";
@@ -89,24 +96,31 @@ const cancelEdit = () => {
 const saveEdit = async (fumigationId) => {
   try {
     let payload = {
-      status: editingStatus.value,
+      status: editingStatus.value, // Envía el ID del estado (número)
       product_suggested: editingProductId.value || null,
-      notes: editingNotes.value || ""
+      notes: editingNotes.value || "",
     };
+    
     // Solo enviar cantidad utilizada si status es COMPLETED
-    const statusObj = statusOptions.value.find(s => s.value === editingStatus.value);
-    if (statusObj && statusObj.label === "Completado") {
+    const selectedStatus = statusOptions.value.find((s) => s.value === editingStatus.value);
+    if (selectedStatus && selectedStatus.statusName === "COMPLETED") {
       payload.product_used = editingProductUsed.value;
     }
-    await axios.patch(`fumigationRequest/${fumigationId}/`,
-      payload,
-      { headers: { Authorization: `Bearer ${store.token.access}` } }
-    );
+    
+    console.log("Enviando payload:", payload);
+    console.log("Estado seleccionado:", selectedStatus);
+    
+    await axios.patch(`fumigationRequest/${fumigationId}/`, payload, {
+      headers: { Authorization: `Bearer ${store.token.access}` },
+    });
+    
+    console.log("Solicitud actualizada correctamente");
     cancelEdit();
     await listarFumigaciones();
   } catch (error) {
     alert("No se pudo actualizar la solicitud.");
-    console.log(error);
+    console.log("Error al actualizar:", error);
+    console.log("Error response:", error.response?.data);
   }
 };
 
@@ -206,7 +220,7 @@ onMounted(async () => {
                         <!-- Cantidad utilizada -->
                         <td>
                           <template
-                            v-if="editingId === lf.id && statusOptions.find(s => s.value === editingStatus)?.label === 'Completado'">
+                            v-if="editingId === lf.id && statusOptions.find(s => s.value === editingStatus)?.statusName === 'COMPLETED'">
                             <input v-model="editingProductUsed" type="number" min="0" step="0.01"
                               class="form-control form-control-sm" style="width: 90px; display: inline-block;"
                               placeholder="Cantidad" />
@@ -227,7 +241,7 @@ onMounted(async () => {
                             </select>
                           </template>
                           <template v-else>
-                            {{ statusTranslation[lf.status_name] || lf.status_name }}
+                            {{ statusTranslation[lf.status_name] }}
                           </template>
                         </td>
                         <!-- Campo Notas -->

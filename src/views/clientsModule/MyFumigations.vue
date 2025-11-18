@@ -20,22 +20,32 @@ const fields = [
 
 const statusTranslation = {
     "REQUESTED": "Solicitado",
+    "SCHEDULED": "Programado",
     "IN_PROGRESS": "En progreso",
     "COMPLETED": "Completado",
     "CANCELLED": "Cancelado",
+    "PENDING": "Pendiente",
+    "APPROVED": "Aprobado",
+    "REJECTED": "Rechazado",
 };
 
 const getFumigations = async () => {
-    loading.value = true;
-    try {
-        const response = await axios.get("/fumigationRequest/", {
-            headers: { Authorization: `Bearer ${store.token.access}` }
-        });
-        listFumigations.value = response.data;
-    } catch (e) {
-        console.log(e);
+  loading.value = true;
+  try {
+    const response = await axios.get("fumigationRequest/", {
+      headers: { Authorization: `Bearer ${store.token.access}` },
+    });
+    listFumigations.value = response.data;
+    console.log("Fumigaciones cargadas:", response.data.length);
+  } catch (error) {
+    console.error("Error al cargar fumigaciones:", error);
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
     }
+  } finally {
     loading.value = false;
+  }
 };
 
 onMounted(() => {
